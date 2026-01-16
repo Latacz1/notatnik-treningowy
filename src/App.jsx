@@ -17,7 +17,7 @@ import {
 import { 
   ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, Clock,
   ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, TrendingUp, Activity,
-  Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft
+  Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check
 } from 'lucide-react';
 
 // ===========================================
@@ -86,9 +86,12 @@ function AuthScreen() {
       setLoading(true);
       try {
         await resetPassword(email);
-        setSuccess('Link do resetu hasła wysłany!');
+        setSuccess('Link do resetu hasła wysłany! Sprawdź też folder SPAM.');
       } catch (err) {
-        setError(err.code === 'auth/user-not-found' ? 'Nie znaleziono konta' : 'Wystąpił błąd');
+        console.error('Reset error:', err);
+        if (err.code === 'auth/user-not-found') setError('Nie znaleziono konta z tym emailem');
+        else if (err.code === 'auth/invalid-email') setError('Nieprawidłowy format email');
+        else setError('Wystąpił błąd: ' + err.message);
       }
       setLoading(false);
       return;
@@ -97,110 +100,147 @@ function AuthScreen() {
     if (mode === 'register' && password !== confirmPassword) {
       return setError('Hasła nie są identyczne');
     }
-    if (password.length < 6) return setError('Hasło min. 6 znaków');
+    if (password.length < 6) return setError('Hasło musi mieć minimum 6 znaków');
 
     setLoading(true);
     try {
       if (mode === 'login') await login(email, password);
       else await signup(email, password);
     } catch (err) {
-      if (err.code === 'auth/email-already-in-use') setError('Email zajęty');
-      else if (err.code === 'auth/invalid-credential') setError('Błędny email lub hasło');
-      else setError('Wystąpił błąd');
+      console.error('Auth error:', err);
+      if (err.code === 'auth/email-already-in-use') setError('Ten email jest już zarejestrowany');
+      else if (err.code === 'auth/invalid-credential') setError('Nieprawidłowy email lub hasło');
+      else if (err.code === 'auth/invalid-email') setError('Nieprawidłowy format email');
+      else setError('Wystąpił błąd: ' + err.message);
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5">
-        <div className="text-center mb-5">
-          <Dumbbell className="w-10 h-10 text-blue-600 mx-auto mb-2" />
-          <h1 className="text-xl font-bold">Notatnik Treningowy</h1>
-          <p className="text-gray-500 text-sm">
-            {mode === 'login' ? 'Zaloguj się' : mode === 'register' ? 'Rejestracja' : 'Reset hasła'}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Dumbbell className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Notatnik Treningowy</h1>
+          <p className="text-gray-500 mt-2">
+            {mode === 'login' ? 'Zaloguj się do konta' : mode === 'register' ? 'Stwórz nowe konto' : 'Zresetuj hasło'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">
-              <Mail className="w-4 h-4" /> Email
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Adres email
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="twoj@email.pl"
-              required
-              className="w-full border rounded-lg px-3 py-2.5 text-base"
-            />
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jan@przykład.pl"
+                required
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+              />
+            </div>
           </div>
 
           {mode !== 'reset' && (
             <div>
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">
-                <Lock className="w-4 h-4" /> Hasło
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Hasło
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••"
-                required
-                className="w-full border rounded-lg px-3 py-2.5 text-base"
-              />
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+                />
+              </div>
             </div>
           )}
 
           {mode === 'register' && (
             <div>
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">
-                <Lock className="w-4 h-4" /> Potwierdź
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Potwierdź hasło
               </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••"
-                required
-                className="w-full border rounded-lg px-3 py-2.5 text-base"
-              />
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+                />
+              </div>
             </div>
           )}
 
-          {error && <div className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm">{error}</div>}
-          {success && <div className="bg-green-50 text-green-600 px-3 py-2 rounded-lg text-sm">{success}</div>}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              {success}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg shadow-indigo-200"
           >
             {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-            {mode === 'login' ? 'Zaloguj' : mode === 'register' ? 'Zarejestruj' : 'Wyślij link'}
+            {mode === 'login' ? 'Zaloguj się' : mode === 'register' ? 'Zarejestruj się' : 'Wyślij link resetujący'}
           </button>
         </form>
 
-        <div className="mt-4 text-center space-y-2">
+        <div className="mt-6 space-y-3">
           {mode === 'login' && (
             <>
-              <button onClick={() => { setMode('reset'); setError(''); setSuccess(''); }} className="text-gray-500 text-sm block w-full">
+              <button 
+                onClick={() => { setMode('reset'); setError(''); setSuccess(''); }} 
+                className="w-full text-gray-500 hover:text-gray-700 py-2 text-sm transition-colors"
+              >
                 Nie pamiętasz hasła?
               </button>
-              <button onClick={() => { setMode('register'); setError(''); setSuccess(''); }} className="text-blue-600 text-sm">
-                Nie masz konta? Zarejestruj się
-              </button>
+              <div className="border-t pt-4">
+                <button 
+                  onClick={() => { setMode('register'); setError(''); setSuccess(''); }} 
+                  className="w-full text-indigo-600 hover:text-indigo-800 font-semibold py-2 transition-colors"
+                >
+                  Nie masz konta? Zarejestruj się
+                </button>
+              </div>
             </>
           )}
           {mode === 'register' && (
-            <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }} className="text-blue-600 text-sm">
-              Masz konto? Zaloguj się
+            <button 
+              onClick={() => { setMode('login'); setError(''); setSuccess(''); }} 
+              className="w-full text-indigo-600 hover:text-indigo-800 font-semibold py-2 transition-colors"
+            >
+              Masz już konto? Zaloguj się
             </button>
           )}
           {mode === 'reset' && (
-            <button onClick={() => { setMode('login'); setError(''); setSuccess(''); }} className="text-blue-600 text-sm flex items-center justify-center gap-1 w-full">
-              <ArrowLeft className="w-4 h-4" /> Wróć
+            <button 
+              onClick={() => { setMode('login'); setError(''); setSuccess(''); }} 
+              className="w-full text-indigo-600 hover:text-indigo-800 font-semibold py-2 flex items-center justify-center gap-2 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" /> Wróć do logowania
             </button>
           )}
         </div>
@@ -214,40 +254,42 @@ function AuthScreen() {
 // ===========================================
 const WORKOUT_CATEGORIES = {
   silownia: {
-    name: 'Siłownia', icon: '🏋️', color: 'bg-blue-500',
-    lightColor: 'bg-blue-50 text-blue-800 border-blue-200',
+    name: 'Siłownia', icon: '🏋️', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600',
+    lightColor: 'bg-blue-50 text-blue-900 border-blue-200',
     subcategories: [
-      { id: 'klatka', name: 'Klatka', exercises: ['Wyciskanie sztangi', 'Wyciskanie hantli', 'Rozpiętki', 'Pompki', 'Dipy', 'Inne'] },
-      { id: 'plecy', name: 'Plecy', exercises: ['Martwy ciąg', 'Wiosłowanie', 'Podciąganie', 'Ściąganie drążka', 'Inne'] },
-      { id: 'barki', name: 'Barki', exercises: ['Military press', 'Wznosy bokiem', 'Face pulls', 'Arnoldki', 'Inne'] },
-      { id: 'biceps', name: 'Biceps', exercises: ['Uginanie sztangi', 'Uginanie hantli', 'Młotki', 'Inne'] },
-      { id: 'triceps', name: 'Triceps', exercises: ['Francuskie', 'Pompki wąskie', 'Wyciąg', 'Inne'] },
-      { id: 'nogi', name: 'Nogi', exercises: ['Przysiad', 'Wykroki', 'Prasa', 'Hip thrust', 'RDL', 'Inne'] },
-      { id: 'brzuch', name: 'Brzuch', exercises: ['Plank', 'Crunch', 'Unoszenie nóg', 'Inne'] },
+      { id: 'klatka', name: 'Klatka piersiowa', exercises: ['Wyciskanie sztangi', 'Wyciskanie hantli', 'Rozpiętki', 'Pompki', 'Dipy', 'Wyciskanie na skosie', 'Inne'] },
+      { id: 'plecy', name: 'Plecy', exercises: ['Martwy ciąg', 'Wiosłowanie sztangą', 'Podciąganie', 'Ściąganie drążka', 'Wiosłowanie hantlem', 'Inne'] },
+      { id: 'barki', name: 'Barki', exercises: ['Military press', 'Wznosy bokiem', 'Wznosy przodem', 'Face pulls', 'Arnoldki', 'Inne'] },
+      { id: 'biceps', name: 'Biceps', exercises: ['Uginanie sztangi', 'Uginanie hantli', 'Młotki', 'Uginanie na modlitewniku', 'Inne'] },
+      { id: 'triceps', name: 'Triceps', exercises: ['Francuskie wyciskanie', 'Pompki wąskie', 'Prostowanie na wyciągu', 'Dipy', 'Inne'] },
+      { id: 'nogi', name: 'Nogi', exercises: ['Przysiad', 'Wykroki', 'Prasa nożna', 'Wyprost nóg', 'Uginanie nóg', 'Hip thrust', 'Martwy ciąg rumuński', 'Inne'] },
+      { id: 'brzuch', name: 'Brzuch', exercises: ['Plank', 'Brzuszki', 'Unoszenie nóg', 'Russian twist', 'Inne'] },
       { id: 'inne_silowe', name: 'Inne', exercises: ['Inne'] },
     ]
   },
   cardio: {
-    name: 'Cardio', icon: '🏃', color: 'bg-green-500',
-    lightColor: 'bg-green-50 text-green-800 border-green-200',
+    name: 'Cardio', icon: '🏃', color: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600',
+    lightColor: 'bg-emerald-50 text-emerald-900 border-emerald-200',
     subcategories: [
-      { id: 'bieganie', name: 'Bieganie', exercises: ['Bieg', 'Bieżnia', 'Interwały', 'Inne'] },
-      { id: 'rower', name: 'Rower', exercises: ['Rower stacjonarny', 'Outdoor', 'Spinning', 'Inne'] },
-      { id: 'inne_cardio', name: 'Inne', exercises: ['Orbitrek', 'Skakanka', 'HIIT', 'Spacer', 'Inne'] },
+      { id: 'bieganie', name: 'Bieganie', exercises: ['Bieg na zewnątrz', 'Bieżnia', 'Interwały', 'Tempo run', 'Inne'] },
+      { id: 'rower', name: 'Rower', exercises: ['Rower stacjonarny', 'Rower outdoor', 'Spinning', 'Inne'] },
+      { id: 'plywanie', name: 'Pływanie', exercises: ['Kraul', 'Żabka', 'Grzbiet', 'Dowolnie', 'Inne'] },
+      { id: 'inne_cardio', name: 'Inne cardio', exercises: ['Orbitrek', 'Wioślarnia', 'Skakanka', 'HIIT', 'Spacer', 'Inne'] },
     ]
   },
   mobility: {
-    name: 'Mobilność', icon: '🧘', color: 'bg-purple-500',
-    lightColor: 'bg-purple-50 text-purple-800 border-purple-200',
+    name: 'Mobilność', icon: '🧘', color: 'bg-violet-500', gradient: 'from-violet-500 to-violet-600',
+    lightColor: 'bg-violet-50 text-violet-900 border-violet-200',
     subcategories: [
-      { id: 'yoga', name: 'Yoga', exercises: ['Vinyasa', 'Hatha', 'Inne'] },
-      { id: 'stretching', name: 'Stretching', exercises: ['Ogólne', 'Góra', 'Dół', 'Inne'] },
-      { id: 'foam', name: 'Foam rolling', exercises: ['Roller', 'Piłeczka', 'Inne'] },
+      { id: 'yoga', name: 'Yoga', exercises: ['Vinyasa', 'Hatha', 'Power yoga', 'Yin yoga', 'Inne'] },
+      { id: 'stretching', name: 'Stretching', exercises: ['Rozciąganie ogólne', 'Góra ciała', 'Dół ciała', 'Dynamiczne', 'Inne'] },
+      { id: 'foam', name: 'Foam rolling', exercises: ['Roller plecy', 'Roller nogi', 'Piłeczka', 'Inne'] },
     ]
   },
 };
 
 const DAYS_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
+const DAYS_FULL = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
 const MONTHS = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
 function formatDateKey(date) { return date.toISOString().split('T')[0]; }
@@ -279,7 +321,6 @@ function getWeekDays(date) {
 // ===========================================
 function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
   const getRange = () => {
-    if (viewMode === 'day') return { start: currentDate, end: currentDate };
     if (viewMode === 'week') {
       const days = getWeekDays(currentDate);
       return { start: days[0].date, end: days[6].date };
@@ -299,70 +340,87 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
   const exercises = filtered.flatMap(([_, t]) => t.flatMap(x => x.exercises));
   const totalTrainings = filtered.reduce((a, [_, t]) => a + t.length, 0);
   const totalSets = exercises.reduce((a, e) => a + (parseInt(e.sets) || 0), 0);
+  const totalReps = exercises.reduce((a, e) => a + ((parseInt(e.sets) || 0) * (parseInt(e.reps) || 0)), 0);
+  const totalWeight = exercises.reduce((a, e) => a + ((parseInt(e.sets) || 0) * (parseInt(e.reps) || 0) * (parseFloat(e.weight) || 0)), 0);
   const totalDuration = filtered.reduce((a, [_, t]) => a + t.reduce((b, x) => b + (parseInt(x.duration) || 0), 0), 0);
 
   const catStats = {};
   exercises.forEach(e => { catStats[e.category] = (catStats[e.category] || 0) + 1; });
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            <span className="font-semibold">Statystyki</span>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden">
+        <div className="p-6 border-b bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Statystyki</h3>
+                <p className="text-white/70 text-sm">{start.toLocaleDateString('pl')} - {end.toLocaleDateString('pl')}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="w-10 h-10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
-        <div className="p-4 overflow-y-auto">
-          <p className="text-xs text-gray-500 mb-4">{start.toLocaleDateString('pl')} - {end.toLocaleDateString('pl')}</p>
-          
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-200">
-              <Activity className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-              <p className="text-2xl font-bold text-blue-800">{totalTrainings}</p>
-              <p className="text-xs text-blue-600">Treningi</p>
+        <div className="p-6 overflow-y-auto max-h-[60vh]">
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 border border-blue-200">
+              <Activity className="w-8 h-8 text-blue-600 mb-2" />
+              <p className="text-3xl font-bold text-blue-900">{totalTrainings}</p>
+              <p className="text-blue-600 font-medium">Treningów</p>
             </div>
-            <div className="bg-green-50 rounded-xl p-3 text-center border border-green-200">
-              <Target className="w-5 h-5 text-green-600 mx-auto mb-1" />
-              <p className="text-2xl font-bold text-green-800">{totalSets}</p>
-              <p className="text-xs text-green-600">Serie</p>
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-5 border border-emerald-200">
+              <Target className="w-8 h-8 text-emerald-600 mb-2" />
+              <p className="text-3xl font-bold text-emerald-900">{totalSets}</p>
+              <p className="text-emerald-600 font-medium">Serii</p>
             </div>
-            <div className="bg-orange-50 rounded-xl p-3 text-center border border-orange-200">
-              <Timer className="w-5 h-5 text-orange-600 mx-auto mb-1" />
-              <p className="text-2xl font-bold text-orange-800">{totalDuration}m</p>
-              <p className="text-xs text-orange-600">Czas</p>
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-5 border border-orange-200">
+              <Timer className="w-8 h-8 text-orange-600 mb-2" />
+              <p className="text-3xl font-bold text-orange-900">{totalDuration}</p>
+              <p className="text-orange-600 font-medium">Minut</p>
+            </div>
+            <div className="bg-gradient-to-br from-violet-50 to-violet-100 rounded-2xl p-5 border border-violet-200">
+              <TrendingUp className="w-8 h-8 text-violet-600 mb-2" />
+              <p className="text-3xl font-bold text-violet-900">{(totalWeight/1000).toFixed(1)}t</p>
+              <p className="text-violet-600 font-medium">Tonażu</p>
             </div>
           </div>
 
           {Object.keys(catStats).length > 0 && (
-            <div>
-              <h4 className="text-sm font-semibold mb-3 flex items-center gap-1">
-                <Flame className="w-4 h-4 text-orange-500" /> Kategorie
+            <div className="bg-gray-50 rounded-2xl p-5">
+              <h4 className="font-bold mb-4 flex items-center gap-2">
+                <Flame className="w-5 h-5 text-orange-500" /> Podział na kategorie
               </h4>
-              {Object.entries(catStats).map(([cat, count]) => {
-                const c = WORKOUT_CATEGORIES[cat];
-                const pct = exercises.length > 0 ? Math.round((count / exercises.length) * 100) : 0;
-                return (
-                  <div key={cat} className="flex items-center gap-2 mb-2">
-                    <span className="w-20 text-sm">{c?.icon} {c?.name}</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                      <div className={`${c?.color} h-full`} style={{ width: `${pct}%` }} />
+              <div className="space-y-3">
+                {Object.entries(catStats).map(([cat, count]) => {
+                  const c = WORKOUT_CATEGORIES[cat];
+                  const pct = exercises.length > 0 ? Math.round((count / exercises.length) * 100) : 0;
+                  return (
+                    <div key={cat}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{c?.icon} {c?.name}</span>
+                        <span className="font-bold">{pct}%</span>
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div className={`h-full ${c?.color} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <span className="text-sm w-10 text-right font-medium">{pct}%</span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
 
           {totalTrainings === 0 && (
-            <div className="text-center py-8 text-gray-400">
-              <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-30" />
-              <p>Brak danych</p>
+            <div className="text-center py-12 text-gray-400">
+              <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">Brak danych w tym okresie</p>
+              <p className="text-sm mt-1">Dodaj treningi, aby zobaczyć statystyki</p>
             </div>
           )}
         </div>
@@ -372,75 +430,104 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
 }
 
 // ===========================================
-// TRAINING CARD
+// TRAINING CARD (Desktop)
 // ===========================================
-function TrainingCard({ training, dateKey, onEdit, onDelete, onAddExercise, expanded: forceExpanded }) {
-  const [expanded, setExpanded] = useState(forceExpanded || false);
+function TrainingCardDesktop({ training, dateKey, onEdit, onDelete, onAddExercise, compact = false }) {
+  const [expanded, setExpanded] = useState(!compact);
+  const categories = [...new Set(training.exercises.map(e => e.category))];
 
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-      <div 
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
-        onClick={() => setExpanded(!expanded)}
+  if (compact) {
+    return (
+      <div
+        onClick={() => onEdit(training)}
+        className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl p-3 cursor-pointer hover:shadow-lg transition-all group"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-gray-700">
-            <Clock className="w-4 h-4 text-gray-400" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 opacity-80" />
             <span className="font-semibold">{training.startTime}</span>
           </div>
-          {training.duration && (
-            <span className="text-sm text-gray-500">• {training.duration}min</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
           <div className="flex gap-1">
-            {[...new Set(training.exercises.map(e => e.category))].map(c => (
+            {categories.map(c => (
               <span key={c} className="text-lg">{WORKOUT_CATEGORIES[c]?.icon}</span>
             ))}
           </div>
-          <span className="text-sm text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+        </div>
+        {training.note && (
+          <p className="text-sm text-white/80 mt-1 truncate">{training.note}</p>
+        )}
+        <div className="text-xs text-white/70 mt-1">
+          {training.exercises.length} ćwiczeń
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+      <div 
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">
+            {training.startTime.split(':')[0]}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg">{training.startTime}</span>
+              {training.duration && (
+                <span className="text-gray-500">• {training.duration} min</span>
+              )}
+            </div>
+            {training.note && (
+              <p className="text-gray-500 text-sm">{training.note}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1">
+            {categories.map(c => (
+              <span key={c} className="text-2xl">{WORKOUT_CATEGORIES[c]?.icon}</span>
+            ))}
+          </div>
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 font-semibold text-sm">
             {training.exercises.length}
-          </span>
+          </div>
           {expanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
         </div>
       </div>
 
       {expanded && (
-        <div className="border-t">
-          {training.note && (
-            <div className="px-3 py-2 bg-amber-50 text-sm text-amber-800 border-b">
-              📝 {training.note}
-            </div>
-          )}
-          
-          <div className="p-2 space-y-2">
+        <div className="border-t-2 border-gray-100">
+          <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
             {training.exercises.map((ex, i) => {
               const cat = WORKOUT_CATEGORIES[ex.category];
               const name = ex.exercise === 'Inne' ? ex.customExercise : ex.exercise;
               return (
-                <div key={i} className={`${cat?.lightColor} rounded-lg p-3 border`}>
-                  <div className="font-medium flex items-center gap-2">
-                    <span>{cat?.icon}</span>
-                    <span>{name}</span>
+                <div key={i} className={`${cat?.lightColor} rounded-xl p-4 border-2`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">{cat?.icon}</span>
+                    <span className="font-semibold text-lg">{name}</span>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2">
                     {ex.sets && ex.reps && (
-                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
-                        {ex.sets} × {ex.reps}
+                      <span className="bg-white px-3 py-1.5 rounded-lg font-medium shadow-sm">
+                        {ex.sets} × {ex.reps} powtórzeń
                       </span>
                     )}
                     {ex.weight && (
-                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                      <span className="bg-white px-3 py-1.5 rounded-lg font-medium shadow-sm">
                         {ex.weight} kg
                       </span>
                     )}
                     {ex.duration && (
-                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                      <span className="bg-white px-3 py-1.5 rounded-lg font-medium shadow-sm">
                         {ex.duration} min
                       </span>
                     )}
                     {ex.distance && (
-                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                      <span className="bg-white px-3 py-1.5 rounded-lg font-medium shadow-sm">
                         {ex.distance} km
                       </span>
                     )}
@@ -450,24 +537,24 @@ function TrainingCard({ training, dateKey, onEdit, onDelete, onAddExercise, expa
             })}
           </div>
 
-          <div className="flex border-t">
+          <div className="flex border-t-2 border-gray-100">
             <button 
               onClick={(e) => { e.stopPropagation(); onAddExercise(training); }}
-              className="flex-1 py-3 text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2 font-medium"
+              className="flex-1 py-4 text-indigo-600 hover:bg-indigo-50 flex items-center justify-center gap-2 font-semibold transition-colors"
             >
-              <Plus className="w-4 h-4" /> Dodaj
+              <Plus className="w-5 h-5" /> Dodaj ćwiczenie
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onEdit(training); }}
-              className="flex-1 py-3 text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2 font-medium border-l"
+              className="flex-1 py-4 text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2 font-semibold transition-colors border-l-2 border-gray-100"
             >
-              <Edit2 className="w-4 h-4" /> Edytuj
+              <Edit2 className="w-5 h-5" /> Edytuj
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onDelete(dateKey, training.id); }}
-              className="flex-1 py-3 text-red-600 hover:bg-red-50 flex items-center justify-center gap-2 font-medium border-l"
+              className="flex-1 py-4 text-red-600 hover:bg-red-50 flex items-center justify-center gap-2 font-semibold transition-colors border-l-2 border-gray-100"
             >
-              <Trash2 className="w-4 h-4" /> Usuń
+              <Trash2 className="w-5 h-5" /> Usuń
             </button>
           </div>
         </div>
@@ -484,34 +571,42 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
   const sub = cat?.subcategories.find(s => s.id === exercise.subcategory);
 
   return (
-    <div className="bg-gray-50 rounded-xl p-3 border space-y-3">
+    <div className="bg-gray-50 rounded-2xl p-5 border-2 border-gray-200 space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-500">Ćwiczenie {index + 1}</span>
-        <button onClick={onRemove} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
-          <Trash2 className="w-4 h-4" />
+        <span className="font-bold text-gray-700">Ćwiczenie {index + 1}</span>
+        <button onClick={onRemove} className="w-10 h-10 text-red-500 hover:bg-red-50 rounded-xl flex items-center justify-center transition-colors">
+          <Trash2 className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         {Object.entries(WORKOUT_CATEGORIES).map(([k, c]) => (
           <button
             key={k}
             onClick={() => onChange({ ...exercise, category: k, subcategory: '', exercise: '' })}
-            className={`p-2 rounded-xl text-center transition-all ${exercise.category === k ? `${c.color} text-white shadow-md` : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
+            className={`p-4 rounded-xl text-center transition-all ${
+              exercise.category === k 
+                ? `bg-gradient-to-br ${c.gradient} text-white shadow-lg` 
+                : 'bg-white border-2 border-gray-200 hover:border-gray-300'
+            }`}
           >
-            <span className="text-xl">{c.icon}</span>
-            <p className="text-xs font-medium mt-1">{c.name}</p>
+            <span className="text-3xl block mb-1">{c.icon}</span>
+            <span className="font-semibold text-sm">{c.name}</span>
           </button>
         ))}
       </div>
 
       {exercise.category && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {cat?.subcategories.map(s => (
             <button
               key={s.id}
               onClick={() => onChange({ ...exercise, subcategory: s.id, exercise: '' })}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${exercise.subcategory === s.id ? 'bg-blue-600 text-white' : 'bg-white border hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                exercise.subcategory === s.id 
+                  ? 'bg-indigo-600 text-white shadow-md' 
+                  : 'bg-white border-2 border-gray-200 hover:border-indigo-300'
+              }`}
             >
               {s.name}
             </button>
@@ -523,7 +618,7 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
         <select
           value={exercise.exercise}
           onChange={(e) => onChange({ ...exercise, exercise: e.target.value })}
-          className="w-full border-2 rounded-xl px-3 py-2.5 text-base bg-white"
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
         >
           <option value="">Wybierz ćwiczenie...</option>
           {sub.exercises.map(e => <option key={e} value={e}>{e}</option>)}
@@ -535,45 +630,83 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
           type="text"
           value={exercise.customExercise || ''}
           onChange={(e) => onChange({ ...exercise, customExercise: e.target.value })}
-          placeholder="Nazwa ćwiczenia..."
-          className="w-full border-2 rounded-xl px-3 py-2.5 text-base"
+          placeholder="Wpisz nazwę ćwiczenia..."
+          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
         />
       )}
 
       {exercise.category === 'silownia' && exercise.exercise && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-gray-500 font-medium">Serie</label>
-            <input type="number" value={exercise.sets || ''} onChange={(e) => onChange({ ...exercise, sets: e.target.value })} placeholder="4" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Serie</label>
+            <input 
+              type="number" 
+              value={exercise.sets || ''} 
+              onChange={(e) => onChange({ ...exercise, sets: e.target.value })} 
+              placeholder="4" 
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+            />
           </div>
           <div>
-            <label className="text-xs text-gray-500 font-medium">Powtórzenia</label>
-            <input type="number" value={exercise.reps || ''} onChange={(e) => onChange({ ...exercise, reps: e.target.value })} placeholder="10" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Powtórzenia</label>
+            <input 
+              type="number" 
+              value={exercise.reps || ''} 
+              onChange={(e) => onChange({ ...exercise, reps: e.target.value })} 
+              placeholder="10" 
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+            />
           </div>
           <div>
-            <label className="text-xs text-gray-500 font-medium">Ciężar (kg)</label>
-            <input type="number" step="0.5" value={exercise.weight || ''} onChange={(e) => onChange({ ...exercise, weight: e.target.value })} placeholder="60" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Ciężar (kg)</label>
+            <input 
+              type="number" 
+              step="0.5" 
+              value={exercise.weight || ''} 
+              onChange={(e) => onChange({ ...exercise, weight: e.target.value })} 
+              placeholder="60" 
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+            />
           </div>
         </div>
       )}
 
       {exercise.category === 'cardio' && exercise.exercise && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-gray-500 font-medium">Czas (min)</label>
-            <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="30" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Czas (min)</label>
+            <input 
+              type="number" 
+              value={exercise.duration || ''} 
+              onChange={(e) => onChange({ ...exercise, duration: e.target.value })} 
+              placeholder="30" 
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+            />
           </div>
           <div>
-            <label className="text-xs text-gray-500 font-medium">Dystans (km)</label>
-            <input type="number" step="0.1" value={exercise.distance || ''} onChange={(e) => onChange({ ...exercise, distance: e.target.value })} placeholder="5" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Dystans (km)</label>
+            <input 
+              type="number" 
+              step="0.1" 
+              value={exercise.distance || ''} 
+              onChange={(e) => onChange({ ...exercise, distance: e.target.value })} 
+              placeholder="5" 
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+            />
           </div>
         </div>
       )}
 
       {exercise.category === 'mobility' && exercise.exercise && (
         <div>
-          <label className="text-xs text-gray-500 font-medium">Czas (min)</label>
-          <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="20" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
+          <label className="block text-sm font-semibold text-gray-600 mb-2">Czas (min)</label>
+          <input 
+            type="number" 
+            value={exercise.duration || ''} 
+            onChange={(e) => onChange({ ...exercise, duration: e.target.value })} 
+            placeholder="20" 
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
+          />
         </div>
       )}
     </div>
@@ -581,7 +714,7 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
 }
 
 // ===========================================
-// MOBILE VIEW - Day Strip + Training List
+// MOBILE VIEW
 // ===========================================
 function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEditTraining, onDeleteTraining, onAddExercise, currentWeekStart }) {
   const todayKey = formatDateKey(new Date());
@@ -595,10 +728,10 @@ function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEd
   });
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Day Strip */}
-      <div className="bg-white border-b px-2 py-3">
-        <div className="flex justify-between">
+    <div className="flex flex-col h-full bg-gray-50">
+      {/* Week Strip */}
+      <div className="bg-white border-b shadow-sm px-2 py-4">
+        <div className="flex justify-between gap-1">
           {weekDays.map((date, i) => {
             const dk = formatDateKey(date);
             const isToday = dk === todayKey;
@@ -609,22 +742,22 @@ function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEd
               <button
                 key={i}
                 onClick={() => onSelectDate(date)}
-                className={`flex-1 flex flex-col items-center py-2 rounded-xl mx-0.5 transition-all ${
+                className={`flex-1 flex flex-col items-center py-3 rounded-2xl transition-all ${
                   isSelected 
-                    ? 'bg-blue-600 text-white shadow-lg' 
+                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg scale-105' 
                     : isToday 
-                      ? 'bg-blue-100 text-blue-700' 
+                      ? 'bg-indigo-100 text-indigo-700' 
                       : 'hover:bg-gray-100'
                 }`}
               >
-                <span className={`text-xs font-medium ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                <span className={`text-xs font-semibold ${isSelected ? 'text-indigo-200' : 'text-gray-500'}`}>
                   {DAYS_SHORT[date.getDay()]}
                 </span>
-                <span className={`text-lg font-bold mt-0.5 ${isSelected ? '' : isToday ? 'text-blue-700' : ''}`}>
+                <span className={`text-xl font-bold mt-1 ${isSelected ? '' : isToday ? 'text-indigo-700' : ''}`}>
                   {date.getDate()}
                 </span>
                 {hasTraining && (
-                  <div className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-blue-500'}`} />
+                  <div className={`w-2 h-2 rounded-full mt-1.5 ${isSelected ? 'bg-white' : 'bg-indigo-500'}`} />
                 )}
               </button>
             );
@@ -632,44 +765,45 @@ function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEd
         </div>
       </div>
 
-      {/* Selected Date Header */}
-      <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
+      {/* Date Header */}
+      <div className="bg-white px-5 py-4 border-b flex items-center justify-between">
         <div>
-          <h2 className="font-bold text-lg">
-            {selectedDate.toLocaleDateString('pl-PL', { weekday: 'long' })}
+          <h2 className="font-bold text-xl text-gray-900">
+            {DAYS_FULL[selectedDate.getDay()]}
           </h2>
-          <p className="text-sm text-gray-500">
-            {selectedDate.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+          <p className="text-gray-500">
+            {selectedDate.getDate()} {MONTHS[selectedDate.getMonth()]} {selectedDate.getFullYear()}
           </p>
         </div>
         <button
           onClick={() => onAddTraining(selectedDate)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 shadow-md hover:bg-blue-700 transition-colors"
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
         >
           <Plus className="w-5 h-5" />
-          Dodaj
+          Nowy trening
         </button>
       </div>
 
       {/* Training List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {dayTrainings.length > 0 ? (
           dayTrainings.map(training => (
-            <TrainingCard
+            <TrainingCardDesktop
               key={training.id}
               training={training}
               dateKey={selectedKey}
               onEdit={() => onEditTraining(training)}
               onDelete={onDeleteTraining}
               onAddExercise={() => onAddExercise(training)}
-              expanded={dayTrainings.length === 1}
             />
           ))
         ) : (
-          <div className="text-center py-12">
-            <Dumbbell className="w-16 h-16 mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-500 font-medium">Brak treningów</p>
-            <p className="text-gray-400 text-sm mt-1">Kliknij "Dodaj" aby dodać trening</p>
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Dumbbell className="w-12 h-12 text-gray-300" />
+            </div>
+            <p className="text-gray-900 font-semibold text-lg">Brak treningów</p>
+            <p className="text-gray-500 mt-2">Kliknij "Nowy trening" aby dodać</p>
           </div>
         )}
       </div>
@@ -678,10 +812,11 @@ function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEd
 }
 
 // ===========================================
-// DESKTOP VIEW - Grid Calendar
+// DESKTOP VIEW
 // ===========================================
-function DesktopView({ trainings, currentDate, viewMode, onAddTraining, onEditTraining, onDeleteTraining, onAddExercise }) {
+function DesktopView({ trainings, currentDate, viewMode, selectedDate, onSelectDate, onAddTraining, onEditTraining, onDeleteTraining, onAddExercise }) {
   const todayKey = formatDateKey(new Date());
+  const selectedKey = formatDateKey(selectedDate);
   
   const getDays = () => {
     if (viewMode === 'week') return getWeekDays(currentDate);
@@ -689,63 +824,114 @@ function DesktopView({ trainings, currentDate, viewMode, onAddTraining, onEditTr
   };
 
   const days = getDays();
+  const isWeek = viewMode === 'week';
 
   return (
-    <div className="p-2">
-      <div className="grid grid-cols-7 gap-1 mb-1">
-        {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => (
-          <div key={d} className="text-center text-sm font-medium text-gray-500 py-2">{d}</div>
-        ))}
-      </div>
+    <div className="flex h-full">
+      {/* Calendar Grid */}
+      <div className={`${isWeek ? 'flex-1' : 'w-full'} p-4`}>
+        {/* Day Headers */}
+        <div className={`grid ${isWeek ? 'grid-cols-7' : 'grid-cols-7'} gap-2 mb-2`}>
+          {['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'].map((d, i) => (
+            <div key={d} className="text-center py-3 font-semibold text-gray-600">
+              {isWeek ? d : d.slice(0, 3)}
+            </div>
+          ))}
+        </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {days.map(({ date, currentMonth }, i) => {
-          const dk = formatDateKey(date);
-          const dt = trainings[dk] || [];
-          const isToday = dk === todayKey;
+        {/* Days Grid */}
+        <div className={`grid grid-cols-7 gap-2 ${isWeek ? 'h-[calc(100vh-200px)]' : ''}`}>
+          {days.map(({ date, currentMonth }, i) => {
+            const dk = formatDateKey(date);
+            const dt = trainings[dk] || [];
+            const isToday = dk === todayKey;
+            const isSelected = dk === selectedKey;
 
-          return (
-            <div
-              key={i}
-              className={`bg-white border rounded-lg overflow-hidden
-                ${viewMode === 'week' ? 'min-h-[400px]' : 'min-h-[100px]'}
-                ${isToday ? 'border-blue-500 border-2' : 'border-gray-200'}
-                ${!currentMonth ? 'opacity-40' : ''}`}
-            >
-              <div className={`flex items-center justify-between px-2 py-1 border-b ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}>
-                <span className={`text-sm font-semibold ${isToday ? 'text-blue-600' : ''}`}>{date.getDate()}</span>
-                <button onClick={() => onAddTraining(date)} className="p-1 hover:bg-gray-200 rounded">
-                  <Plus className="w-4 h-4 text-gray-500" />
-                </button>
-              </div>
-              <div className={`p-1 space-y-1 overflow-y-auto ${viewMode === 'week' ? 'max-h-[350px]' : 'max-h-[60px]'}`}>
-                {viewMode === 'month' ? (
-                  dt.slice(0, 2).map(t => (
-                    <div
-                      key={t.id}
-                      onClick={() => onEditTraining(t, date)}
-                      className="bg-blue-100 text-blue-800 rounded px-2 py-1 text-xs cursor-pointer hover:bg-blue-200 truncate"
-                    >
-                      {t.startTime} {[...new Set(t.exercises.map(e => WORKOUT_CATEGORIES[e.category]?.icon))].join('')}
-                    </div>
-                  ))
-                ) : (
-                  dt.map(t => (
-                    <TrainingCard
+            return (
+              <div
+                key={i}
+                onClick={() => onSelectDate(date)}
+                className={`
+                  bg-white rounded-2xl border-2 overflow-hidden cursor-pointer transition-all hover:shadow-lg
+                  ${isWeek ? 'flex flex-col' : 'min-h-[120px]'}
+                  ${isToday ? 'border-indigo-500 shadow-md' : isSelected ? 'border-purple-400' : 'border-gray-100'}
+                  ${!currentMonth ? 'opacity-40' : ''}
+                `}
+              >
+                {/* Day Header */}
+                <div className={`flex items-center justify-between px-3 py-2 border-b ${
+                  isToday ? 'bg-indigo-50' : 'bg-gray-50'
+                }`}>
+                  <span className={`font-bold ${isToday ? 'text-indigo-600' : ''} ${isWeek ? 'text-lg' : 'text-sm'}`}>
+                    {date.getDate()}
+                  </span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onAddTraining(date); }}
+                    className={`${isWeek ? 'w-8 h-8' : 'w-6 h-6'} hover:bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 transition-colors`}
+                  >
+                    <Plus className={isWeek ? 'w-5 h-5' : 'w-4 h-4'} />
+                  </button>
+                </div>
+
+                {/* Trainings */}
+                <div className={`p-2 space-y-2 overflow-y-auto ${isWeek ? 'flex-1' : 'max-h-[80px]'}`}>
+                  {dt.map(t => (
+                    <TrainingCardDesktop
                       key={t.id}
                       training={t}
                       dateKey={dk}
                       onEdit={() => onEditTraining(t, date)}
                       onDelete={onDeleteTraining}
                       onAddExercise={() => onAddExercise(t, date)}
+                      compact={!isWeek}
                     />
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {/* Side Panel for selected day (week view) */}
+      {isWeek && (
+        <div className="w-96 border-l-2 border-gray-100 bg-gray-50 p-4 overflow-y-auto">
+          <div className="mb-4">
+            <h3 className="font-bold text-xl text-gray-900">
+              {DAYS_FULL[selectedDate.getDay()]}
+            </h3>
+            <p className="text-gray-500">
+              {selectedDate.getDate()} {MONTHS[selectedDate.getMonth()]}
+            </p>
+          </div>
+          
+          <button
+            onClick={() => onAddTraining(selectedDate)}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 mb-4 shadow-lg"
+          >
+            <Plus className="w-5 h-5" /> Dodaj trening
+          </button>
+
+          <div className="space-y-3">
+            {(trainings[selectedKey] || []).map(t => (
+              <TrainingCardDesktop
+                key={t.id}
+                training={t}
+                dateKey={selectedKey}
+                onEdit={() => onEditTraining(t, selectedDate)}
+                onDelete={onDeleteTraining}
+                onAddExercise={() => onAddExercise(t, selectedDate)}
+              />
+            ))}
+            {!(trainings[selectedKey]?.length) && (
+              <div className="text-center py-8 text-gray-400">
+                <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Brak treningów</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -764,7 +950,7 @@ function TrainingTracker() {
   const [showMenu, setShowMenu] = useState(false);
   const [editingTraining, setEditingTraining] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   
   const [form, setForm] = useState({
     startTime: '08:00', duration: '', note: '',
@@ -772,7 +958,7 @@ function TrainingTracker() {
   });
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -876,7 +1062,7 @@ function TrainingTracker() {
     }
     if (viewMode === 'week') {
       const d = getWeekDays(currentDate);
-      return `${d[0].date.getDate()}-${d[6].date.getDate()} ${MONTHS[d[0].date.getMonth()].slice(0, 3)}`;
+      return `${d[0].date.getDate()} - ${d[6].date.getDate()} ${MONTHS[d[0].date.getMonth()]} ${d[0].date.getFullYear()}`;
     }
     return `${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   };
@@ -884,28 +1070,45 @@ function TrainingTracker() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10 px-3 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Dumbbell className="w-6 h-6 text-blue-600" />
-            <span className="font-bold">Notatnik</span>
-            {saving && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+      <header className="bg-white border-b shadow-sm sticky top-0 z-10">
+        <div className="px-4 lg:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+              <Dumbbell className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-xl hidden sm:block">Notatnik Treningowy</span>
+            {saving && <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />}
           </div>
-          <div className="flex items-center">
-            <button onClick={() => setShowStats(true)} className="p-2 text-purple-600">
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowStats(true)} 
+              className="w-10 h-10 lg:w-auto lg:px-4 lg:py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-xl flex items-center justify-center lg:gap-2 font-semibold transition-colors"
+            >
               <BarChart3 className="w-5 h-5" />
+              <span className="hidden lg:inline">Statystyki</span>
             </button>
+            
             <div className="relative">
-              <button onClick={() => setShowMenu(!showMenu)} className="p-2 text-gray-600">
+              <button 
+                onClick={() => setShowMenu(!showMenu)} 
+                className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors"
+              >
                 <Menu className="w-5 h-5" />
               </button>
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 top-full bg-white border rounded-xl shadow-lg py-1 min-w-[180px] z-20">
-                    <div className="px-4 py-2 border-b text-sm text-gray-500 truncate">{user?.email}</div>
-                    <button onClick={() => { logout(); setShowMenu(false); }} className="w-full px-4 py-3 text-left text-red-600 flex items-center gap-2 hover:bg-red-50">
-                      <LogOut className="w-4 h-4" /> Wyloguj
+                  <div className="absolute right-0 top-full mt-2 bg-white border rounded-2xl shadow-xl py-2 min-w-[220px] z-20">
+                    <div className="px-4 py-3 border-b">
+                      <p className="font-semibold text-gray-900 truncate">{user?.email}</p>
+                      <p className="text-sm text-gray-500">Zalogowany</p>
+                    </div>
+                    <button 
+                      onClick={() => { logout(); setShowMenu(false); }} 
+                      className="w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 flex items-center gap-3 font-medium transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" /> Wyloguj się
                     </button>
                   </div>
                 </>
@@ -914,30 +1117,44 @@ function TrainingTracker() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-1">
-            <button onClick={() => nav(-1)} className="p-2 hover:bg-gray-100 rounded-lg">
+        {/* Navigation */}
+        <div className="px-4 lg:px-6 py-3 flex items-center justify-between border-t bg-gray-50">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => nav(-1)} 
+              className="w-10 h-10 bg-white hover:bg-gray-100 border rounded-xl flex items-center justify-center transition-colors"
+            >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={() => nav(1)} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button 
+              onClick={() => nav(1)} 
+              className="w-10 h-10 bg-white hover:bg-gray-100 border rounded-xl flex items-center justify-center transition-colors"
+            >
               <ChevronRight className="w-5 h-5" />
             </button>
-            <button onClick={goToToday} className="px-3 py-1.5 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg">
+            <button 
+              onClick={goToToday} 
+              className="px-4 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-xl font-semibold transition-colors"
+            >
               Dziś
             </button>
           </div>
           
-          <span className="font-semibold">{title()}</span>
+          <h2 className="font-bold text-lg lg:text-xl">{title()}</h2>
           
           {!isMobile && (
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {[{ id: 'week', l: 'Tydzień' }, { id: 'month', l: 'Miesiąc' }].map(m => (
+            <div className="flex bg-white border rounded-xl p-1">
+              {[{ id: 'week', label: 'Tydzień' }, { id: 'month', label: 'Miesiąc' }].map(m => (
                 <button
                   key={m.id}
                   onClick={() => { setViewMode(m.id); save(trainings, m.id); }}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === m.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'}`}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    viewMode === m.id 
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
                 >
-                  {m.l}
+                  {m.label}
                 </button>
               ))}
             </div>
@@ -947,7 +1164,7 @@ function TrainingTracker() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 overflow-hidden">
         {isMobile ? (
           <MobileView
@@ -965,6 +1182,8 @@ function TrainingTracker() {
             trainings={trainings}
             currentDate={currentDate}
             viewMode={viewMode}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
             onAddTraining={openAdd}
             onEditTraining={openEdit}
             onDeleteTraining={deleteTraining}
@@ -978,67 +1197,69 @@ function TrainingTracker() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-bold text-lg">{editingTraining ? 'Edytuj trening' : 'Nowy trening'}</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-xl">{editingTraining ? 'Edytuj trening' : 'Nowy trening'}</h3>
+                <p className="text-gray-500 mt-1 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {selectedDate?.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="w-10 h-10 hover:bg-gray-100 rounded-xl flex items-center justify-center transition-colors"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="w-5 h-5" />
-                <span className="font-medium">
-                  {selectedDate?.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-600 font-medium">Godzina</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Godzina rozpoczęcia</label>
                   <input 
                     type="time" 
                     value={form.startTime} 
                     onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                    className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-600 font-medium">Czas trwania (min)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Czas trwania (min)</label>
                   <input 
                     type="number" 
                     value={form.duration} 
                     onChange={(e) => setForm({ ...form, duration: e.target.value })}
                     placeholder="60" 
-                    className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-gray-600 font-medium">Notatka</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Notatka (opcjonalnie)</label>
                 <input 
                   type="text" 
                   value={form.note} 
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
-                  placeholder="np. Push day, FBW..." 
-                  className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                  placeholder="np. Push day, FBW, Cardio..." 
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-indigo-500" 
                 />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="font-medium">Ćwiczenia</label>
+                <div className="flex items-center justify-between mb-4">
+                  <label className="font-bold text-lg">Ćwiczenia</label>
                   <button 
                     onClick={() => setForm({ ...form, exercises: [...form.exercises, { category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }] })}
-                    className="text-blue-600 font-medium flex items-center gap-1"
+                    className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-2 transition-colors"
                   >
-                    <Plus className="w-4 h-4" /> Dodaj
+                    <Plus className="w-5 h-5" /> Dodaj ćwiczenie
                   </button>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {form.exercises.map((ex, i) => (
                     <ExerciseForm 
                       key={i} 
@@ -1052,19 +1273,19 @@ function TrainingTracker() {
               </div>
             </div>
 
-            <div className="p-4 border-t bg-gray-50 flex gap-3">
+            <div className="p-6 border-t bg-gray-50 flex gap-4">
               <button 
                 onClick={() => setShowModal(false)} 
-                className="flex-1 py-3 border-2 rounded-xl font-medium"
+                className="flex-1 py-4 border-2 border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Anuluj
               </button>
               <button 
                 onClick={saveTraining} 
                 disabled={!form.exercises.some(e => e.exercise)}
-                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-md"
+                className="flex-1 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold disabled:opacity-50 shadow-lg hover:shadow-xl transition-all"
               >
-                Zapisz
+                Zapisz trening
               </button>
             </div>
           </div>
@@ -1087,6 +1308,15 @@ export default function App() {
 
 function AppContent() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white/80 font-medium">Ładowanie...</p>
+        </div>
+      </div>
+    );
+  }
   return user ? <TrainingTracker /> : <AuthScreen />;
 }
