@@ -116,7 +116,6 @@ const dk = d => d.toISOString().split('T')[0];
 const getWeek = d => { const s = new Date(d); const day = s.getDay(); s.setDate(s.getDate() - day + (day === 0 ? -6 : 1)); return Array.from({ length: 7 }, (_, i) => { const x = new Date(s); x.setDate(s.getDate() + i); return x; }); };
 const getMonth = (y, m) => { const f = new Date(y, m, 1), l = new Date(y, m + 1, 0), days = [], st = f.getDay() === 0 ? 6 : f.getDay() - 1; for (let i = st - 1; i >= 0; i--) days.push({ d: new Date(y, m, -i), cur: false }); for (let i = 1; i <= l.getDate(); i++) days.push({ d: new Date(y, m, i), cur: true }); while (days.length < 42) days.push({ d: new Date(y, m + 1, days.length - l.getDate() - st + 1), cur: false }); return days; };
 
-// Helper do obliczania statystyk
 function calcStats(data, start, end) {
   const filtered = Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= start && d <= end; });
   const allExs = filtered.flatMap(([_, t]) => t.flatMap(x => x.exercises));
@@ -131,7 +130,6 @@ function calcStats(data, start, end) {
   };
 }
 
-// ============ COMPARE SCREEN ============
 function CompareScreen({ data, onBack }) {
   const [period1, setPeriod1] = useState({ type: 'month', start: '', end: '' });
   const [period2, setPeriod2] = useState({ type: 'prevMonth', start: '', end: '' });
@@ -153,24 +151,14 @@ function CompareScreen({ data, onBack }) {
   const s1 = calcStats(data, r1.s, r1.e);
   const s2 = calcStats(data, r2.s, r2.e);
 
-  const diff = (a, b) => {
-    if (b === 0) return a > 0 ? 100 : 0;
-    return Math.round(((a - b) / b) * 100);
-  };
-
-  const DiffBadge = ({ val }) => {
-    if (val === 0) return <span className="text-gray-400 text-xs">0%</span>;
-    return <span className={`text-xs font-semibold ${val > 0 ? 'text-green-600' : 'text-red-600'}`}>{val > 0 ? '+' : ''}{val}%</span>;
-  };
+  const diff = (a, b) => b === 0 ? (a > 0 ? 100 : 0) : Math.round(((a - b) / b) * 100);
+  const DiffBadge = ({ val }) => val === 0 ? <span className="text-gray-400 text-xs">0%</span> : <span className={`text-xs font-semibold ${val > 0 ? 'text-green-600' : 'text-red-600'}`}>{val > 0 ? '+' : ''}{val}%</span>;
 
   const periods = [
-    { id: 'week', label: 'Ten tydzień' },
-    { id: 'prevWeek', label: 'Poprzedni tydzień' },
-    { id: 'month', label: 'Ten miesiąc' },
-    { id: 'prevMonth', label: 'Poprzedni miesiąc' },
-    { id: 'year', label: 'Ten rok' },
-    { id: 'prevYear', label: 'Poprzedni rok' },
-    { id: 'custom', label: 'Własny zakres' },
+    { id: 'week', label: 'Ten tydzień' }, { id: 'prevWeek', label: 'Poprz. tydzień' },
+    { id: 'month', label: 'Ten miesiąc' }, { id: 'prevMonth', label: 'Poprz. miesiąc' },
+    { id: 'year', label: 'Ten rok' }, { id: 'prevYear', label: 'Poprz. rok' },
+    { id: 'custom', label: 'Własny' },
   ];
 
   return (
@@ -183,41 +171,24 @@ function CompareScreen({ data, onBack }) {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Period 1 */}
         <div className="bg-white rounded-xl p-4 mb-3 shadow-sm">
           <h3 className="font-semibold mb-2 text-indigo-600">Okres 1</h3>
           <div className="flex flex-wrap gap-1 mb-2">
-            {periods.map(p => (
-              <button key={p.id} onClick={() => setPeriod1({ ...period1, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period1.type === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
-            ))}
+            {periods.map(p => <button key={p.id} onClick={() => setPeriod1({ ...period1, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period1.type === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>)}
           </div>
-          {period1.type === 'custom' && (
-            <div className="flex gap-2 mt-2">
-              <input type="date" value={period1.start} onChange={e => setPeriod1({ ...period1, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
-              <input type="date" value={period1.end} onChange={e => setPeriod1({ ...period1, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
-            </div>
-          )}
+          {period1.type === 'custom' && <div className="flex gap-2 mt-2"><input type="date" value={period1.start} onChange={e => setPeriod1({ ...period1, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" /><input type="date" value={period1.end} onChange={e => setPeriod1({ ...period1, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" /></div>}
           <p className="text-xs text-gray-500 mt-1">{r1.s.toLocaleDateString('pl')} — {r1.e.toLocaleDateString('pl')}</p>
         </div>
 
-        {/* Period 2 */}
         <div className="bg-white rounded-xl p-4 mb-4 shadow-sm">
           <h3 className="font-semibold mb-2 text-purple-600">Okres 2</h3>
           <div className="flex flex-wrap gap-1 mb-2">
-            {periods.map(p => (
-              <button key={p.id} onClick={() => setPeriod2({ ...period2, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period2.type === p.id ? 'bg-purple-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
-            ))}
+            {periods.map(p => <button key={p.id} onClick={() => setPeriod2({ ...period2, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period2.type === p.id ? 'bg-purple-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>)}
           </div>
-          {period2.type === 'custom' && (
-            <div className="flex gap-2 mt-2">
-              <input type="date" value={period2.start} onChange={e => setPeriod2({ ...period2, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
-              <input type="date" value={period2.end} onChange={e => setPeriod2({ ...period2, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
-            </div>
-          )}
+          {period2.type === 'custom' && <div className="flex gap-2 mt-2"><input type="date" value={period2.start} onChange={e => setPeriod2({ ...period2, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" /><input type="date" value={period2.end} onChange={e => setPeriod2({ ...period2, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" /></div>}
           <p className="text-xs text-gray-500 mt-1">{r2.s.toLocaleDateString('pl')} — {r2.e.toLocaleDateString('pl')}</p>
         </div>
 
-        {/* Comparison table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="grid grid-cols-4 text-xs font-semibold border-b">
             <div className="p-3 bg-gray-50">Metryka</div>
@@ -225,7 +196,6 @@ function CompareScreen({ data, onBack }) {
             <div className="p-3 bg-purple-50 text-purple-700 text-center">Okres 2</div>
             <div className="p-3 bg-gray-50 text-center">Różnica</div>
           </div>
-          
           {[
             { label: 'Treningi', k: 'trainings', unit: '' },
             { label: 'Serie', k: 'sets', unit: '' },
@@ -243,28 +213,20 @@ function CompareScreen({ data, onBack }) {
           ))}
         </div>
 
-        {/* Visual comparison */}
         <div className="mt-4 bg-white rounded-xl p-4 shadow-sm">
           <h3 className="font-semibold mb-3">📊 Wizualne porównanie</h3>
           {[
-            { label: 'Treningi', v1: s1.trainings, v2: s2.trainings, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
-            { label: 'Serie', v1: s1.sets, v2: s2.sets, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
-            { label: 'Czas (min)', v1: s1.mins, v2: s2.mins, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
-          ].map(({ label, v1, v2, color1, color2 }) => {
+            { label: 'Treningi', v1: s1.trainings, v2: s2.trainings },
+            { label: 'Serie', v1: s1.sets, v2: s2.sets },
+            { label: 'Czas (min)', v1: s1.mins, v2: s2.mins },
+          ].map(({ label, v1, v2 }) => {
             const max = Math.max(v1, v2, 1);
             return (
               <div key={label} className="mb-3">
-                <div className="flex justify-between text-xs mb-1">
-                  <span>{label}</span>
-                  <span>{v1} vs {v2}</span>
-                </div>
+                <div className="flex justify-between text-xs mb-1"><span>{label}</span><span>{v1} vs {v2}</span></div>
                 <div className="flex gap-1">
-                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                    <div className={`h-full ${color1}`} style={{ width: `${(v1/max)*100}%` }} />
-                  </div>
-                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
-                    <div className={`h-full ${color2}`} style={{ width: `${(v2/max)*100}%` }} />
-                  </div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden"><div className="h-full bg-indigo-500" style={{ width: `${(v1/max)*100}%` }} /></div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden"><div className="h-full bg-purple-500" style={{ width: `${(v2/max)*100}%` }} /></div>
                 </div>
               </div>
             );
@@ -275,7 +237,6 @@ function CompareScreen({ data, onBack }) {
   );
 }
 
-// ============ STATS SCREEN ============
 function StatsScreen({ data, onBack, onCompare }) {
   const [period, setPeriod] = useState('month');
   const [customStart, setCustomStart] = useState('');
@@ -298,12 +259,8 @@ function StatsScreen({ data, onBack, onCompare }) {
   const cats = {}; allExs.forEach(ex => { cats[ex.cat] = (cats[ex.cat] || 0) + 1; });
   const exCount = {}; allExs.forEach(ex => { const name = ex.ex === 'Inne' ? ex.custom : ex.ex; if (name) exCount[name] = (exCount[name] || 0) + 1; });
   const topExercises = Object.entries(exCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  
   const dayCount = {};
-  Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= s && d <= e; }).forEach(([k]) => {
-    const d = new Date(k).getDay();
-    dayCount[d] = (dayCount[d] || 0) + 1;
-  });
+  Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= s && d <= e; }).forEach(([k]) => { const d = new Date(k).getDay(); dayCount[d] = (dayCount[d] || 0) + 1; });
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
@@ -314,8 +271,7 @@ function StatsScreen({ data, onBack, onCompare }) {
             <div className="flex items-center gap-2"><BarChart3 className="w-6 h-6 text-indigo-600" /><h1 className="text-xl font-bold">Statystyki</h1></div>
           </div>
           <button onClick={onCompare} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg flex items-center gap-1 text-sm font-medium">
-            <GitCompare className="w-5 h-5" />
-            <span className="hidden sm:inline">Porównaj</span>
+            <GitCompare className="w-5 h-5" /><span className="hidden sm:inline">Porównaj</span>
           </button>
         </div>
       </header>
@@ -328,48 +284,20 @@ function StatsScreen({ data, onBack, onCompare }) {
               <button key={p.id} onClick={() => setPeriod(p.id)} className={`px-3 py-2 rounded-lg text-sm font-medium ${period === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
             ))}
           </div>
-          {period === 'custom' && (
-            <div className="flex gap-2">
-              <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="flex-1 border rounded-lg px-3 py-2 text-sm" />
-              <span className="self-center text-gray-400">—</span>
-              <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="flex-1 border rounded-lg px-3 py-2 text-sm" />
-            </div>
-          )}
+          {period === 'custom' && <div className="flex gap-2"><input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="flex-1 border rounded-lg px-3 py-2 text-sm" /><span className="self-center text-gray-400">—</span><input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="flex-1 border rounded-lg px-3 py-2 text-sm" /></div>}
           <p className="text-sm text-gray-500 mt-2">{s.toLocaleDateString('pl')} — {e.toLocaleDateString('pl')}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-            <Activity className="w-5 h-5 mb-1 opacity-80" />
-            <p className="text-2xl font-bold">{totalTrainings}</p>
-            <p className="text-xs opacity-80">Treningów</p>
-          </div>
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white">
-            <Target className="w-5 h-5 mb-1 opacity-80" />
-            <p className="text-2xl font-bold">{totalSets}</p>
-            <p className="text-xs opacity-80">Serii</p>
-          </div>
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white">
-            <Timer className="w-5 h-5 mb-1 opacity-80" />
-            <p className="text-2xl font-bold">{totalMins}</p>
-            <p className="text-xs opacity-80">Minut</p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-            <Zap className="w-5 h-5 mb-1 opacity-80" />
-            <p className="text-2xl font-bold">{totalReps}</p>
-            <p className="text-xs opacity-80">Powtórzeń</p>
-          </div>
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white"><Activity className="w-5 h-5 mb-1 opacity-80" /><p className="text-2xl font-bold">{totalTrainings}</p><p className="text-xs opacity-80">Treningów</p></div>
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white"><Target className="w-5 h-5 mb-1 opacity-80" /><p className="text-2xl font-bold">{totalSets}</p><p className="text-xs opacity-80">Serii</p></div>
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white"><Timer className="w-5 h-5 mb-1 opacity-80" /><p className="text-2xl font-bold">{totalMins}</p><p className="text-xs opacity-80">Minut</p></div>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white"><Zap className="w-5 h-5 mb-1 opacity-80" /><p className="text-2xl font-bold">{totalReps}</p><p className="text-xs opacity-80">Powtórzeń</p></div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-500" /><span className="font-semibold text-sm">Tonaż</span></div>
-            <p className="text-xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">t</span></p>
-          </div>
-          <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4 text-emerald-500" /><span className="font-semibold text-sm">Dystans</span></div>
-            <p className="text-xl font-bold">{totalDist.toFixed(1)} <span className="text-sm font-normal text-gray-500">km</span></p>
-          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-500" /><span className="font-semibold text-sm">Tonaż</span></div><p className="text-xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">t</span></p></div>
+          <div className="bg-white rounded-xl p-4 shadow-sm"><div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4 text-emerald-500" /><span className="font-semibold text-sm">Dystans</span></div><p className="text-xl font-bold">{totalDist.toFixed(1)} <span className="text-sm font-normal text-gray-500">km</span></p></div>
         </div>
 
         {Object.keys(cats).length > 0 && (
@@ -415,7 +343,6 @@ function StatsScreen({ data, onBack, onCompare }) {
   );
 }
 
-// ============ DAY VIEW ============
 function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
   const key = dk(date);
   const trainings = data[key] || [];
@@ -445,13 +372,8 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                        <span className="text-lg font-bold">{t.startTime.split(':')[0]}</span>
-                      </div>
-                      <div>
-                        <p className="font-bold">{t.startTime}</p>
-                        {t.dur && <p className="text-white/80 text-sm">{t.dur} min</p>}
-                      </div>
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center"><span className="text-lg font-bold">{t.startTime.split(':')[0]}</span></div>
+                      <div><p className="font-bold">{t.startTime}</p>{t.dur && <p className="text-white/80 text-sm">{t.dur} min</p>}</div>
                     </div>
                     <div className="flex gap-1">{[...new Set(t.exercises.map(e => e.cat))].map(c => <span key={c} className="text-xl">{CATS[c]?.icon}</span>)}</div>
                   </div>
@@ -489,9 +411,7 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
           <div className="text-center py-16">
             <Dumbbell className="w-12 h-12 mx-auto text-gray-300 mb-4" />
             <p className="text-gray-500 font-medium">Brak treningów</p>
-            <button onClick={() => onAdd(date)} className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2">
-              <Plus className="w-4 h-4" />Dodaj trening
-            </button>
+            <button onClick={() => onAdd(date)} className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2"><Plus className="w-4 h-4" />Dodaj trening</button>
           </div>
         )}
       </div>
@@ -499,7 +419,6 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
   );
 }
 
-// ============ EXERCISE FORM ============
 function ExForm({ ex, onChange, onRemove, idx }) {
   const cat = CATS[ex.cat], sub = cat?.subs.find(s => s.id === ex.sub);
   return (
@@ -516,7 +435,6 @@ function ExForm({ ex, onChange, onRemove, idx }) {
   );
 }
 
-// ============ MOBILE WEEK VIEW ============
 function MobileWeek({ data, sel, setSel, ws, onDayClick }) {
   const today = dk(new Date()), selKey = dk(sel);
   const week = Array.from({ length: 7 }, (_, i) => { const d = new Date(ws); d.setDate(d.getDate() + i); return d; });
@@ -529,9 +447,9 @@ function MobileWeek({ data, sel, setSel, ws, onDayClick }) {
           {week.map((d, i) => { 
             const k = dk(d), isT = k === today, isS = k === selKey, has = data[k]?.length > 0; 
             return (
-              <button key={i} onClick={() => setSel(d)} className={`flex-1 py-2 rounded-lg flex flex-col items-center ${isS ? 'bg-indigo-600 text-white' : isT ? 'bg-indigo-100' : ''}`}>
-                <span className={`text-xs ${isS ? 'text-indigo-200' : 'text-gray-500'}`}>{DAYS[d.getDay()]}</span>
-                <span className="text-lg font-bold">{d.getDate()}</span>
+              <button key={i} onClick={() => setSel(d)} className={`flex-1 py-2 rounded-lg flex flex-col items-center ${isS ? 'bg-indigo-600 text-white' : isT ? 'bg-amber-50 border border-amber-200' : ''}`}>
+                <span className={`text-xs ${isS ? 'text-indigo-200' : isT ? 'text-amber-600' : 'text-gray-500'}`}>{DAYS[d.getDay()]}</span>
+                <span className={`text-lg font-bold ${isT && !isS ? 'text-amber-700' : ''}`}>{d.getDate()}</span>
                 {has && <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isS ? 'bg-white' : 'bg-indigo-500'}`} />}
               </button>
             ); 
@@ -572,7 +490,6 @@ function MobileWeek({ data, sel, setSel, ws, onDayClick }) {
   );
 }
 
-// ============ MOBILE MONTH VIEW ============
 function MobileMonth({ data, date, sel, setSel, onDayClick }) {
   const today = dk(new Date()), selKey = dk(sel);
   const days = getMonth(date.getFullYear(), date.getMonth());
@@ -589,14 +506,14 @@ function MobileMonth({ data, date, sel, setSel, onDayClick }) {
           const k = dk(d), t = data[k] || [], isT = k === today, isS = k === selKey;
           const hasTraining = t.length > 0;
           return (
-            <div
+            <button
               key={i}
-              onClick={() => { setSel(d); if (hasTraining) onDayClick(d); }}
-              className={`rounded-lg flex flex-col items-center justify-start p-1 cursor-pointer relative
-                ${isT ? 'bg-indigo-100 border-2 border-indigo-500' : isS ? 'bg-indigo-50 border-2 border-indigo-300' : 'bg-white border border-gray-200'}
+              onClick={() => { setSel(d); onDayClick(d); }}
+              className={`rounded-lg flex flex-col items-center justify-start p-1 relative
+                ${isT ? 'bg-amber-50 border border-amber-200' : isS ? 'bg-indigo-50 border-2 border-indigo-400' : 'bg-white border border-gray-200'}
                 ${!cur ? 'opacity-40' : ''}`}
             >
-              <span className={`text-sm font-bold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
+              <span className={`text-sm font-bold ${isT ? 'text-amber-700' : ''}`}>{d.getDate()}</span>
               {hasTraining && (
                 <div className="flex flex-col items-center mt-0.5">
                   <div className="flex gap-0.5">
@@ -604,16 +521,13 @@ function MobileMonth({ data, date, sel, setSel, onDayClick }) {
                       <span key={c} className="text-xs leading-none">{CATS[c]?.icon}</span>
                     ))}
                   </div>
-                  {/* Kropki zamiast liczby */}
                   <div className="flex gap-0.5 mt-0.5">
-                    {t.slice(0, 3).map((_, j) => (
-                      <div key={j} className="w-1 h-1 rounded-full bg-indigo-500" />
-                    ))}
+                    {t.slice(0, 3).map((_, j) => <div key={j} className="w-1 h-1 rounded-full bg-indigo-500" />)}
                     {t.length > 3 && <span className="text-[8px] text-indigo-500">+</span>}
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -621,7 +535,6 @@ function MobileMonth({ data, date, sel, setSel, onDayClick }) {
   );
 }
 
-// ============ DESKTOP VIEW ============
 function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
   const today = dk(new Date()), selKey = dk(sel);
   const days = mode === 'week' ? getWeek(date).map(d => ({ d, cur: true })) : getMonth(date.getFullYear(), date.getMonth());
@@ -645,11 +558,11 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
                 onClick={() => setSel(d)}
                 onDoubleClick={() => onDayClick(d)}
                 className={`bg-white border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col
-                  ${isT ? 'border-indigo-500 border-2' : isS ? 'border-indigo-300 border-2' : 'border-gray-200'}
+                  ${isT ? 'border-amber-300 bg-amber-50/50' : isS ? 'border-indigo-400 border-2' : 'border-gray-200'}
                   ${!cur ? 'opacity-40' : ''}`}
               >
-                <div className={`flex items-center justify-between px-2 py-1.5 border-b ${isT ? 'bg-indigo-50' : 'bg-gray-50'}`}>
-                  <span className={`text-sm font-bold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
+                <div className={`flex items-center justify-between px-2 py-1.5 border-b ${isT ? 'bg-amber-50' : 'bg-gray-50'}`}>
+                  <span className={`text-sm font-bold ${isT ? 'text-amber-700' : ''}`}>{d.getDate()}</span>
                   {t.length > 0 && <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 rounded">{t.length}</span>}
                 </div>
                 
@@ -695,7 +608,6 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
   );
 }
 
-// ============ MAIN TRACKER ============
 function Tracker() {
   const { user, logout } = useAuth();
   const [screen, setScreen] = useState('calendar');
@@ -720,11 +632,8 @@ function Tracker() {
 
   const nav = dir => { 
     if (mobile) {
-      if (mode === 'week') {
-        const w = new Date(ws); w.setDate(w.getDate() + dir * 7); setWs(w); setSel(w);
-      } else {
-        const d = new Date(date); d.setMonth(d.getMonth() + dir); setDate(d);
-      }
+      if (mode === 'week') { const w = new Date(ws); w.setDate(w.getDate() + dir * 7); setWs(w); setSel(w); }
+      else { const d = new Date(date); d.setMonth(d.getMonth() + dir); setDate(d); }
     } else { 
       const d = new Date(date); 
       mode === 'week' ? d.setDate(d.getDate() + dir * 7) : d.setMonth(d.getMonth() + dir); 
@@ -734,7 +643,8 @@ function Tracker() {
   
   const goToday = () => { const t = new Date(); setDate(t); setSel(t); setWs(getWs(t)); };
   const openDayView = d => { setSel(d); setScreen('day'); };
-  const openAdd = d => { setSel(d); setEditing(null); setForm({ time: '08:00', dur: '', note: '', exercises: [{ ...emptyEx }] }); setModal(true); };
+  const handleAddClick = () => { setEditing(null); setForm({ time: '08:00', dur: '', note: '', exercises: [{ ...emptyEx }] }); setModal(true); };
+  const openAdd = d => { setSel(d); handleAddClick(); };
   const openEdit = t => { setEditing(t); setForm({ time: t.startTime, dur: t.dur || '', note: t.note || '', exercises: t.exercises.length ? t.exercises : [{ ...emptyEx }] }); setModal(true); };
   const openAddEx = t => { setEditing(t); setForm({ time: t.startTime, dur: t.dur || '', note: t.note || '', exercises: [...t.exercises, { ...emptyEx }] }); setModal(true); };
   
@@ -755,13 +665,9 @@ function Tracker() {
       ? `${getWeek(date)[0].getDate()}-${getWeek(date)[6].getDate()} ${MONTHS_SHORT[getWeek(date)[0].getMonth()]} ${getWeek(date)[0].getFullYear()}` 
       : `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 
-  // Compare screen
   if (screen === 'compare') return <CompareScreen data={data} onBack={() => setScreen('stats')} />;
-  
-  // Stats screen
   if (screen === 'stats') return <StatsScreen data={data} onBack={() => setScreen('calendar')} onCompare={() => setScreen('compare')} />;
 
-  // Day view screen
   if (screen === 'day') {
     return (
       <>
@@ -792,7 +698,6 @@ function Tracker() {
     );
   }
 
-  // Calendar view
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       <header className="bg-white border-b flex-shrink-0">
@@ -843,14 +748,37 @@ function Tracker() {
         )}
       </main>
       
-      {/* FAB - fixed z-index and proper event */}
       {mobile && (
-        <button 
-          onClick={(e) => { e.stopPropagation(); openAdd(sel); }} 
-          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center z-50 active:bg-indigo-700"
+        <div 
+          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center z-[9999] cursor-pointer select-none"
+          onTouchStart={(e) => { e.preventDefault(); handleAddClick(); }}
+          onClick={handleAddClick}
         >
-          <Plus className="w-6 h-6" />
-        </button>
+          <Plus className="w-6 h-6 pointer-events-none" />
+        </div>
+      )}
+
+      {modal && screen === 'calendar' && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-3 border-b flex items-center justify-between">
+              <div><h3 className="font-bold">{editing ? 'Edytuj' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</p></div>
+              <button onClick={() => setModal(false)}><X className="w-5 h-5" /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="text-xs font-medium text-gray-600">Godzina</label><input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+                <div><label className="text-xs font-medium text-gray-600">Czas (min)</label><input type="number" value={form.dur} onChange={e => setForm({ ...form, dur: e.target.value })} placeholder="60" className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+              </div>
+              <div><label className="text-xs font-medium text-gray-600">Notatka</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Push day..." className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+              <div>
+                <div className="flex items-center justify-between mb-2"><label className="text-sm font-medium">Ćwiczenia</label><button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4" />Dodaj</button></div>
+                <div className="space-y-2">{form.exercises.map((ex, i) => <ExForm key={i} ex={ex} idx={i} onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} />)}</div>
+              </div>
+            </div>
+            <div className="p-3 border-t flex gap-2"><button onClick={() => setModal(false)} className="flex-1 py-2 border rounded font-medium">Anuluj</button><button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2 bg-indigo-600 text-white rounded font-medium disabled:opacity-50">Zapisz</button></div>
+          </div>
+        </div>
       )}
     </div>
   );
