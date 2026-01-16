@@ -11,7 +11,7 @@ const firebaseConfig = {
   projectId: "notatnik-treningowy-9e1fc",
   storageBucket: "notatnik-treningowy-9e1fc.firebasestorage.app",
   messagingSenderId: "336214735859",
-  appId: "1:336214735859:web:983d2dadcce48055fdb086"
+  appId: "1:336214735859:web:983d2dadcce48055fdb086",
   measurementId: "G-4P6YBSG7GN" 
 };
 
