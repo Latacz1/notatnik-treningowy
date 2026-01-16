@@ -204,7 +204,7 @@ function CompareScreen({ data, onBack }) {
             { label: 'Serie', k: 'sets', unit: '' },
             { label: 'Powtórzenia', k: 'reps', unit: '' },
             { label: 'Czas', k: 'mins', unit: ' min' },
-            { label: 'Tonaż', k: 'kg', unit: ' kg', div: 1 },
+            { label: 'Obciążenie', k: 'kg', unit: ' kg', div: 1 },
             { label: 'Dystans', k: 'dist', unit: ' km' },
           ].map(({ label, k, unit, div }) => (
             <div key={k} className="grid grid-cols-4 text-sm border-b last:border-0">
@@ -299,7 +299,7 @@ function StatsScreen({ data, onBack, onCompare }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-xl p-4 shadow-sm"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-500" /><span className="font-semibold text-sm">Tonaż</span></div><p className="text-xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">t</span></p></div>
+          <div className="bg-white rounded-xl p-4 shadow-sm"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-500" /><span className="font-semibold text-sm">Obciążenie</span></div><p className="text-xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">t</span></p></div>
           <div className="bg-white rounded-xl p-4 shadow-sm"><div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4 text-emerald-500" /><span className="font-semibold text-sm">Dystans</span></div><p className="text-xl font-bold">{totalDist.toFixed(1)} <span className="text-sm font-normal text-gray-500">km</span></p></div>
         </div>
 
@@ -396,7 +396,7 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
                           {ex.dur && <span className="bg-white px-2 py-1 rounded text-sm">{ex.dur} min</span>}
                           {ex.dist && <span className="bg-white px-2 py-1 rounded text-sm">{ex.dist} km</span>}
                         </div>
-                        {ex.sets && ex.reps && ex.weight && <p className="text-xs text-gray-500 mt-2">Tonaż: {(parseInt(ex.sets) * parseInt(ex.reps) * parseFloat(ex.weight)).toFixed(0)} kg</p>}
+                        {ex.sets && ex.reps && ex.weight && <p className="text-xs text-gray-500 mt-2">Obciążenie: {(parseInt(ex.sets) * parseInt(ex.reps) * parseFloat(ex.weight)).toFixed(0)} kg</p>}
                       </div>
                     );
                   })}
