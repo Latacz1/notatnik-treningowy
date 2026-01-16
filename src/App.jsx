@@ -98,15 +98,20 @@ const CATS = {
     { id: 'triceps', name: 'Triceps', ex: ['Francuskie', 'Pompki wąskie', 'Wyciąg', 'Inne'] },
     { id: 'nogi', name: 'Nogi', ex: ['Przysiad', 'Wykroki', 'Prasa', 'Hip thrust', 'RDL', 'Inne'] },
     { id: 'brzuch', name: 'Brzuch', ex: ['Plank', 'Brzuszki', 'Unoszenie nóg', 'Inne'] }
+    { id: 'inne', name: 'Inne', ex: ['Trening ogólny', 'Kalistenika', 'Inne'] }
   ]},
   cardio: { name: 'Cardio', icon: '🏃', color: 'bg-green-500', light: 'bg-green-50 border-green-200 text-green-900', subs: [
-    { id: 'bieganie', name: 'Bieganie', ex: ['Bieg', 'Bieżnia', 'Interwały', 'Inne'] },
-    { id: 'rower', name: 'Rower', ex: ['Stacjonarny', 'Outdoor', 'Inne'] },
+    { id: 'bieganie', name: 'Bieganie', ex: ['Bieg', 'Bieżnia', 'Interwały', 'Sprint', 'Inne'] },
+    { id: 'rower', name: 'Rower', ex: ['Stacjonarny', 'Klasyczny', 'Inne'] },
+    { id: 'pływanie', name: 'Pływanie', ex: ['Basen', 'Areobic', 'Inne'] },
+    { id: 'taniec', name: 'Taniec', ex: ['Hip-Hop', 'Towarzyski', 'Nowoczesny', 'Inne'] },
+
     { id: 'inne', name: 'Inne', ex: ['Orbitrek', 'Skakanka', 'HIIT', 'Spacer', 'Inne'] }
   ]},
   mobility: { name: 'Mobilność', icon: '🧘', color: 'bg-purple-500', light: 'bg-purple-50 border-purple-200 text-purple-900', subs: [
     { id: 'yoga', name: 'Yoga', ex: ['Vinyasa', 'Hatha', 'Inne'] },
     { id: 'stretching', name: 'Stretching', ex: ['Ogólne', 'Góra', 'Dół', 'Inne'] }
+    { id: 'inne', name: 'Inne', ex: ['Sztuki walki', 'Drabinka', 'Pilates', 'HIIT', 'Inne'] }
   ]}
 };
 
