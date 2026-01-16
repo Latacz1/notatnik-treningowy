@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, Activity, Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check, TrendingUp, Award, Zap, GitCompare } from 'lucide-react';
+import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNC14gl1I_RSktGvLb9aCEVrhrxNAwNSA",
@@ -11,11 +12,13 @@ const firebaseConfig = {
   storageBucket: "notatnik-treningowy-9e1fc.firebasestorage.app",
   messagingSenderId: "336214735859",
   appId: "1:336214735859:web:983d2dadcce48055fdb086"
+  measurementId: "G-4P6YBSG7GN" 
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const analytics = getAnalytics(app);
 
 const AuthContext = createContext();
 const useAuth = () => useContext(AuthContext);
