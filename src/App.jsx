@@ -144,12 +144,11 @@ function Card({ t, dk: key, edit, del, addEx }) {
   const [open, setOpen] = useState(false);
   const cats = [...new Set(t.exercises.map(e => e.cat))];
   return (
-    <div className="bg-white border rounded text-xs overflow-hidden">
+    <div className="bg-white border rounded text-xs overflow-hidden shadow-sm">
       <div className="flex items-center justify-between p-1.5 cursor-pointer hover:bg-gray-50" onClick={() => setOpen(!open)}>
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="font-semibold text-indigo-600">{t.startTime}</span>
           <span className="flex">{cats.map(c => <span key={c}>{CATS[c]?.icon}</span>)}</span>
-          {t.dur && <span className="text-gray-400">{t.dur}m</span>}
         </div>
         <div className="flex items-center gap-1">
           <span className="text-gray-400">{t.exercises.length}</span>
@@ -218,32 +217,79 @@ function Desktop({ data, date, mode, sel, setSel, add, edit, del, addEx }) {
   const today = dk(new Date()), selKey = dk(sel);
   const days = mode === 'week' ? getWeek(date).map(d => ({ d, cur: true })) : getMonth(date.getFullYear(), date.getMonth());
   const isW = mode === 'week';
+  const rows = isW ? 1 : 6;
+  
   return (
     <div className="flex h-full">
-      <div className="flex-1 p-2 overflow-auto">
-        <div className="grid grid-cols-7 gap-1 mb-1">{['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => <div key={d} className="text-center py-1 text-xs font-medium text-gray-500">{d}</div>)}</div>
-        <div className={`grid grid-cols-7 gap-1 ${isW ? 'h-[calc(100vh-160px)]' : ''}`}>
+      <div className="flex-1 p-3 flex flex-col overflow-hidden">
+        {/* Header dni */}
+        <div className="grid grid-cols-7 gap-2 mb-2">
+          {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => (
+            <div key={d} className="text-center py-2 text-sm font-semibold text-gray-500">{d}</div>
+          ))}
+        </div>
+        
+        {/* Grid kalendarza - wypełnia dostępne miejsce */}
+        <div className={`grid grid-cols-7 gap-2 flex-1 ${isW ? '' : 'grid-rows-6'}`}>
           {days.map(({ d, cur }, i) => {
             const k = dk(d), t = data[k] || [], isT = k === today, isS = k === selKey;
             return (
-              <div key={i} onClick={() => setSel(d)} className={`bg-white border rounded overflow-hidden cursor-pointer hover:shadow transition-shadow ${isW ? 'flex flex-col' : 'min-h-[70px]'} ${isT ? 'border-indigo-500 border-2' : isS ? 'border-indigo-300' : ''} ${!cur ? 'opacity-40' : ''}`}>
-                <div className={`flex items-center justify-between px-1.5 py-1 border-b ${isT ? 'bg-indigo-50' : 'bg-gray-50'}`}>
-                  <span className={`text-sm font-semibold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
-                  <button onClick={e => { e.stopPropagation(); add(d); }} className="w-5 h-5 hover:bg-indigo-100 rounded flex items-center justify-center text-indigo-600"><Plus className="w-3 h-3" /></button>
+              <div 
+                key={i} 
+                onClick={() => setSel(d)} 
+                className={`
+                  bg-white border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col
+                  ${isT ? 'border-indigo-500 border-2' : isS ? 'border-indigo-300 border-2' : 'border-gray-200'}
+                  ${!cur ? 'opacity-40' : ''}
+                `}
+              >
+                {/* Nagłówek dnia */}
+                <div className={`flex items-center justify-between px-2 py-1.5 border-b ${isT ? 'bg-indigo-50' : 'bg-gray-50'}`}>
+                  <span className={`text-sm font-bold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
+                  <button 
+                    onClick={e => { e.stopPropagation(); add(d); }} 
+                    className="w-6 h-6 hover:bg-indigo-100 rounded flex items-center justify-center text-indigo-600"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className={`p-1 space-y-1 overflow-y-auto ${isW ? 'flex-1' : 'max-h-[40px]'}`}>
-                  {t.map(tr => <Card key={tr.id} t={tr} dk={k} edit={() => { setSel(d); edit(tr); }} del={del} addEx={() => { setSel(d); addEx(tr); }} />)}
+                
+                {/* Treningi */}
+                <div className="flex-1 p-1.5 space-y-1 overflow-y-auto">
+                  {t.map(tr => (
+                    <div 
+                      key={tr.id}
+                      onClick={e => { e.stopPropagation(); setSel(d); edit(tr); }}
+                      className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded p-1.5 cursor-pointer hover:shadow text-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{tr.startTime}</span>
+                        <span className="flex">{[...new Set(tr.exercises.map(e => e.cat))].map(c => <span key={c}>{CATS[c]?.icon}</span>)}</span>
+                      </div>
+                      {tr.note && <p className="text-white/80 truncate text-xs mt-0.5">{tr.note}</p>}
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+      
+      {/* Panel boczny - tylko tydzień */}
       {isW && (
-        <div className="w-64 border-l bg-gray-50 p-2 overflow-y-auto flex-shrink-0">
-          <div className="mb-2"><p className="font-semibold">{sel.toLocaleDateString('pl', { weekday: 'long' })}</p><p className="text-sm text-gray-500">{sel.getDate()} {MONTHS[sel.getMonth()]}</p></div>
-          <button onClick={() => add(sel)} className="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1 mb-2"><Plus className="w-4 h-4" />Dodaj</button>
-          <div className="space-y-2">{(data[selKey] || []).map(t => <Card key={t.id} t={t} dk={selKey} edit={() => edit(t)} del={del} addEx={() => addEx(t)} />)}{!data[selKey]?.length && <div className="text-center py-6 text-gray-400 text-sm"><Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />Brak</div>}</div>
+        <div className="w-72 border-l bg-gray-50 p-3 overflow-y-auto flex-shrink-0">
+          <div className="mb-3">
+            <p className="font-bold text-lg">{sel.toLocaleDateString('pl', { weekday: 'long' })}</p>
+            <p className="text-gray-500">{sel.getDate()} {MONTHS[sel.getMonth()]}</p>
+          </div>
+          <button onClick={() => add(sel)} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 mb-3">
+            <Plus className="w-4 h-4" />Dodaj trening
+          </button>
+          <div className="space-y-2">
+            {(data[selKey] || []).map(t => <Card key={t.id} t={t} dk={selKey} edit={() => edit(t)} del={del} addEx={() => addEx(t)} />)}
+            {!data[selKey]?.length && <div className="text-center py-8 text-gray-400"><Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" /><p>Brak treningów</p></div>}
+          </div>
         </div>
       )}
     </div>
@@ -292,8 +338,8 @@ function Tracker() {
   const title = mobile ? `${MONTHS[ws.getMonth()]} ${ws.getFullYear()}` : mode === 'week' ? `${getWeek(date)[0].getDate()}-${getWeek(date)[6].getDate()} ${MONTHS[getWeek(date)[0].getMonth()]} ${getWeek(date)[0].getFullYear()}` : `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white border-b sticky top-0 z-10">
+    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+      <header className="bg-white border-b flex-shrink-0">
         <div className="px-3 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2"><div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><Dumbbell className="w-4 h-4 text-white" /></div><span className="font-bold hidden sm:block">Notatnik</span>{saving && <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />}</div>
           <div className="flex items-center gap-1">
@@ -311,11 +357,15 @@ function Tracker() {
             <button onClick={goToday} className="px-2 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded">Dziś</button>
           </div>
           <span className="font-semibold text-sm">{title}</span>
-          {!mobile && <div className="flex bg-white border rounded p-0.5">{['week', 'month'].map(m => <button key={m} onClick={() => { setMode(m); save(data, m); }} className={`px-2 py-1 rounded text-xs font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}>{m === 'week' ? 'Tydzień' : 'Miesiąc'}</button>)}</div>}
+          {!mobile && <div className="flex bg-white border rounded p-0.5">{['week', 'month'].map(m => <button key={m} onClick={() => { setMode(m); save(data, m); }} className={`px-3 py-1.5 rounded text-sm font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}>{m === 'week' ? 'Tydzień' : 'Miesiąc'}</button>)}</div>}
           {mobile && <div className="w-14" />}
         </div>
       </header>
-      <main className="flex-1 overflow-hidden">{mobile ? <Mobile data={data} sel={sel} setSel={setSel} ws={ws} add={openAdd} edit={openEdit} del={delT} addEx={openAddEx} /> : <Desktop data={data} date={date} mode={mode} sel={sel} setSel={setSel} add={openAdd} edit={openEdit} del={delT} addEx={openAddEx} />}</main>
+      
+      <main className="flex-1 overflow-hidden">
+        {mobile ? <Mobile data={data} sel={sel} setSel={setSel} ws={ws} add={openAdd} edit={openEdit} del={delT} addEx={openAddEx} /> : <Desktop data={data} date={date} mode={mode} sel={sel} setSel={setSel} add={openAdd} edit={openEdit} del={delT} addEx={openAddEx} />}
+      </main>
+      
       {stats && <Stats data={data} date={mobile ? sel : date} mode={mode} onClose={() => setStats(false)} />}
       {modal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
