@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 // ===========================================
-// 🔥 FIREBASE CONFIG
+// FIREBASE CONFIG
 // ===========================================
 const firebaseConfig = {
   apiKey: "AIzaSyBNC14gl1I_RSktGvLb9aCEVrhrxNAwNSA",
@@ -215,7 +215,7 @@ function AuthScreen() {
 const WORKOUT_CATEGORIES = {
   silownia: {
     name: 'Siłownia', icon: '🏋️', color: 'bg-blue-500',
-    lightColor: 'bg-blue-100 text-blue-800 border-blue-200',
+    lightColor: 'bg-blue-50 text-blue-800 border-blue-200',
     subcategories: [
       { id: 'klatka', name: 'Klatka', exercises: ['Wyciskanie sztangi', 'Wyciskanie hantli', 'Rozpiętki', 'Pompki', 'Dipy', 'Inne'] },
       { id: 'plecy', name: 'Plecy', exercises: ['Martwy ciąg', 'Wiosłowanie', 'Podciąganie', 'Ściąganie drążka', 'Inne'] },
@@ -229,7 +229,7 @@ const WORKOUT_CATEGORIES = {
   },
   cardio: {
     name: 'Cardio', icon: '🏃', color: 'bg-green-500',
-    lightColor: 'bg-green-100 text-green-800 border-green-200',
+    lightColor: 'bg-green-50 text-green-800 border-green-200',
     subcategories: [
       { id: 'bieganie', name: 'Bieganie', exercises: ['Bieg', 'Bieżnia', 'Interwały', 'Inne'] },
       { id: 'rower', name: 'Rower', exercises: ['Rower stacjonarny', 'Outdoor', 'Spinning', 'Inne'] },
@@ -238,7 +238,7 @@ const WORKOUT_CATEGORIES = {
   },
   mobility: {
     name: 'Mobilność', icon: '🧘', color: 'bg-purple-500',
-    lightColor: 'bg-purple-100 text-purple-800 border-purple-200',
+    lightColor: 'bg-purple-50 text-purple-800 border-purple-200',
     subcategories: [
       { id: 'yoga', name: 'Yoga', exercises: ['Vinyasa', 'Hatha', 'Inne'] },
       { id: 'stretching', name: 'Stretching', exercises: ['Ogólne', 'Góra', 'Dół', 'Inne'] },
@@ -247,7 +247,8 @@ const WORKOUT_CATEGORIES = {
   },
 };
 
-const MONTHS = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+const DAYS_SHORT = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
+const MONTHS = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
 function formatDateKey(date) { return date.toISOString().split('T')[0]; }
 
@@ -306,7 +307,7 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between p-3 border-b bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-500 to-purple-500 text-white">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
             <span className="font-semibold">Statystyki</span>
@@ -316,42 +317,42 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
           </button>
         </div>
 
-        <div className="p-3 overflow-y-auto">
-          <p className="text-xs text-gray-500 mb-3">{start.toLocaleDateString('pl')} - {end.toLocaleDateString('pl')}</p>
+        <div className="p-4 overflow-y-auto">
+          <p className="text-xs text-gray-500 mb-4">{start.toLocaleDateString('pl')} - {end.toLocaleDateString('pl')}</p>
           
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="bg-blue-50 rounded-lg p-2 text-center border border-blue-200">
-              <Activity className="w-4 h-4 text-blue-600 mx-auto" />
-              <p className="text-lg font-bold text-blue-800">{totalTrainings}</p>
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-200">
+              <Activity className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-blue-800">{totalTrainings}</p>
               <p className="text-xs text-blue-600">Treningi</p>
             </div>
-            <div className="bg-green-50 rounded-lg p-2 text-center border border-green-200">
-              <Target className="w-4 h-4 text-green-600 mx-auto" />
-              <p className="text-lg font-bold text-green-800">{totalSets}</p>
+            <div className="bg-green-50 rounded-xl p-3 text-center border border-green-200">
+              <Target className="w-5 h-5 text-green-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-green-800">{totalSets}</p>
               <p className="text-xs text-green-600">Serie</p>
             </div>
-            <div className="bg-orange-50 rounded-lg p-2 text-center border border-orange-200">
-              <Timer className="w-4 h-4 text-orange-600 mx-auto" />
-              <p className="text-lg font-bold text-orange-800">{totalDuration}m</p>
+            <div className="bg-orange-50 rounded-xl p-3 text-center border border-orange-200">
+              <Timer className="w-5 h-5 text-orange-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-orange-800">{totalDuration}m</p>
               <p className="text-xs text-orange-600">Czas</p>
             </div>
           </div>
 
           {Object.keys(catStats).length > 0 && (
             <div>
-              <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+              <h4 className="text-sm font-semibold mb-3 flex items-center gap-1">
                 <Flame className="w-4 h-4 text-orange-500" /> Kategorie
               </h4>
               {Object.entries(catStats).map(([cat, count]) => {
                 const c = WORKOUT_CATEGORIES[cat];
                 const pct = exercises.length > 0 ? Math.round((count / exercises.length) * 100) : 0;
                 return (
-                  <div key={cat} className="flex items-center gap-2 mb-1">
-                    <span className="w-16 text-xs truncate">{c?.icon} {c?.name}</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div key={cat} className="flex items-center gap-2 mb-2">
+                    <span className="w-20 text-sm">{c?.icon} {c?.name}</span>
+                    <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden">
                       <div className={`${c?.color} h-full`} style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-xs w-8 text-right">{pct}%</span>
+                    <span className="text-sm w-10 text-right font-medium">{pct}%</span>
                   </div>
                 );
               })}
@@ -359,9 +360,9 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
           )}
 
           {totalTrainings === 0 && (
-            <div className="text-center py-6 text-gray-400">
-              <BarChart3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">Brak danych</p>
+            <div className="text-center py-8 text-gray-400">
+              <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-30" />
+              <p>Brak danych</p>
             </div>
           )}
         </div>
@@ -373,57 +374,100 @@ function StatsPanel({ trainings, currentDate, viewMode, onClose }) {
 // ===========================================
 // TRAINING CARD
 // ===========================================
-function TrainingCard({ training, dateKey, onEdit, onDelete, onAddExercise }) {
-  const [expanded, setExpanded] = useState(false);
+function TrainingCard({ training, dateKey, onEdit, onDelete, onAddExercise, expanded: forceExpanded }) {
+  const [expanded, setExpanded] = useState(forceExpanded || false);
 
   return (
-    <div className="bg-white border rounded overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between p-1.5 cursor-pointer hover:bg-gray-50" onClick={() => setExpanded(!expanded)}>
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Clock className="w-3 h-3 text-gray-500" />
-          <span className="text-xs font-medium">{training.startTime}</span>
-          <div className="flex">
-            {[...new Set(training.exercises.map(e => e.category))].slice(0, 2).map(c => (
-              <span key={c} className="text-xs">{WORKOUT_CATEGORIES[c]?.icon}</span>
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <div 
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-gray-700">
+            <Clock className="w-4 h-4 text-gray-400" />
+            <span className="font-semibold">{training.startTime}</span>
+          </div>
+          {training.duration && (
+            <span className="text-sm text-gray-500">• {training.duration}min</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {[...new Set(training.exercises.map(e => e.category))].map(c => (
+              <span key={c} className="text-lg">{WORKOUT_CATEGORIES[c]?.icon}</span>
             ))}
           </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-gray-400">{training.exercises.length}</span>
-          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          <span className="text-sm text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+            {training.exercises.length}
+          </span>
+          {expanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
         </div>
       </div>
 
       {expanded && (
         <div className="border-t">
           {training.note && (
-            <div className="px-2 py-1 bg-yellow-50 text-xs text-yellow-800 border-b truncate">📝 {training.note}</div>
+            <div className="px-3 py-2 bg-amber-50 text-sm text-amber-800 border-b">
+              📝 {training.note}
+            </div>
           )}
-          <div className="p-1.5 space-y-1 max-h-40 overflow-y-auto">
+          
+          <div className="p-2 space-y-2">
             {training.exercises.map((ex, i) => {
               const cat = WORKOUT_CATEGORIES[ex.category];
               const name = ex.exercise === 'Inne' ? ex.customExercise : ex.exercise;
               return (
-                <div key={i} className={`${cat?.lightColor} rounded p-1.5 border text-xs`}>
-                  <div className="font-medium truncate">{cat?.icon} {name}</div>
-                  <div className="flex flex-wrap gap-1 mt-0.5">
-                    {ex.sets && ex.reps && <span className="bg-white/60 px-1 rounded">{ex.sets}×{ex.reps}</span>}
-                    {ex.weight && <span className="bg-white/60 px-1 rounded">{ex.weight}kg</span>}
-                    {ex.duration && <span className="bg-white/60 px-1 rounded">{ex.duration}min</span>}
+                <div key={i} className={`${cat?.lightColor} rounded-lg p-3 border`}>
+                  <div className="font-medium flex items-center gap-2">
+                    <span>{cat?.icon}</span>
+                    <span>{name}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {ex.sets && ex.reps && (
+                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                        {ex.sets} × {ex.reps}
+                      </span>
+                    )}
+                    {ex.weight && (
+                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                        {ex.weight} kg
+                      </span>
+                    )}
+                    {ex.duration && (
+                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                        {ex.duration} min
+                      </span>
+                    )}
+                    {ex.distance && (
+                      <span className="bg-white/80 px-2 py-1 rounded-lg text-sm font-medium">
+                        {ex.distance} km
+                      </span>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
-          <div className="flex border-t divide-x">
-            <button onClick={() => onAddExercise(training)} className="flex-1 py-1.5 text-blue-600 hover:bg-blue-50">
-              <Plus className="w-3 h-3 mx-auto" />
+
+          <div className="flex border-t">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onAddExercise(training); }}
+              className="flex-1 py-3 text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2 font-medium"
+            >
+              <Plus className="w-4 h-4" /> Dodaj
             </button>
-            <button onClick={() => onEdit(training)} className="flex-1 py-1.5 text-gray-600 hover:bg-gray-50">
-              <Edit2 className="w-3 h-3 mx-auto" />
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEdit(training); }}
+              className="flex-1 py-3 text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2 font-medium border-l"
+            >
+              <Edit2 className="w-4 h-4" /> Edytuj
             </button>
-            <button onClick={() => onDelete(dateKey, training.id)} className="flex-1 py-1.5 text-red-600 hover:bg-red-50">
-              <Trash2 className="w-3 h-3 mx-auto" />
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete(dateKey, training.id); }}
+              className="flex-1 py-3 text-red-600 hover:bg-red-50 flex items-center justify-center gap-2 font-medium border-l"
+            >
+              <Trash2 className="w-4 h-4" /> Usuń
             </button>
           </div>
         </div>
@@ -440,32 +484,34 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
   const sub = cat?.subcategories.find(s => s.id === exercise.subcategory);
 
   return (
-    <div className="bg-gray-50 rounded-lg p-2.5 border space-y-2">
+    <div className="bg-gray-50 rounded-xl p-3 border space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-gray-500">Ćwiczenie {index + 1}</span>
-        <button onClick={onRemove} className="p-1 text-red-500"><Trash2 className="w-4 h-4" /></button>
+        <span className="text-sm font-medium text-gray-500">Ćwiczenie {index + 1}</span>
+        <button onClick={onRemove} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-2">
         {Object.entries(WORKOUT_CATEGORIES).map(([k, c]) => (
           <button
             key={k}
             onClick={() => onChange({ ...exercise, category: k, subcategory: '', exercise: '' })}
-            className={`p-1.5 rounded text-center ${exercise.category === k ? `${c.color} text-white` : 'bg-white border'}`}
+            className={`p-2 rounded-xl text-center transition-all ${exercise.category === k ? `${c.color} text-white shadow-md` : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
           >
-            <span className="text-base">{c.icon}</span>
-            <p className="text-xs mt-0.5">{c.name}</p>
+            <span className="text-xl">{c.icon}</span>
+            <p className="text-xs font-medium mt-1">{c.name}</p>
           </button>
         ))}
       </div>
 
       {exercise.category && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {cat?.subcategories.map(s => (
             <button
               key={s.id}
               onClick={() => onChange({ ...exercise, subcategory: s.id, exercise: '' })}
-              className={`px-2 py-1 rounded text-xs ${exercise.subcategory === s.id ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${exercise.subcategory === s.id ? 'bg-blue-600 text-white' : 'bg-white border hover:bg-gray-50'}`}
             >
               {s.name}
             </button>
@@ -477,9 +523,9 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
         <select
           value={exercise.exercise}
           onChange={(e) => onChange({ ...exercise, exercise: e.target.value })}
-          className="w-full border rounded px-2 py-1.5 text-sm"
+          className="w-full border-2 rounded-xl px-3 py-2.5 text-base bg-white"
         >
-          <option value="">Wybierz...</option>
+          <option value="">Wybierz ćwiczenie...</option>
           {sub.exercises.map(e => <option key={e} value={e}>{e}</option>)}
         </select>
       )}
@@ -489,47 +535,217 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
           type="text"
           value={exercise.customExercise || ''}
           onChange={(e) => onChange({ ...exercise, customExercise: e.target.value })}
-          placeholder="Nazwa..."
-          className="w-full border rounded px-2 py-1.5 text-sm"
+          placeholder="Nazwa ćwiczenia..."
+          className="w-full border-2 rounded-xl px-3 py-2.5 text-base"
         />
       )}
 
       {exercise.category === 'silownia' && exercise.exercise && (
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-2">
           <div>
-            <label className="text-xs text-gray-500">Serie</label>
-            <input type="number" value={exercise.sets || ''} onChange={(e) => onChange({ ...exercise, sets: e.target.value })} placeholder="4" className="w-full border rounded px-2 py-1 text-sm" />
+            <label className="text-xs text-gray-500 font-medium">Serie</label>
+            <input type="number" value={exercise.sets || ''} onChange={(e) => onChange({ ...exercise, sets: e.target.value })} placeholder="4" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Powt.</label>
-            <input type="number" value={exercise.reps || ''} onChange={(e) => onChange({ ...exercise, reps: e.target.value })} placeholder="10" className="w-full border rounded px-2 py-1 text-sm" />
+            <label className="text-xs text-gray-500 font-medium">Powtórzenia</label>
+            <input type="number" value={exercise.reps || ''} onChange={(e) => onChange({ ...exercise, reps: e.target.value })} placeholder="10" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Kg</label>
-            <input type="number" step="0.5" value={exercise.weight || ''} onChange={(e) => onChange({ ...exercise, weight: e.target.value })} placeholder="60" className="w-full border rounded px-2 py-1 text-sm" />
+            <label className="text-xs text-gray-500 font-medium">Ciężar (kg)</label>
+            <input type="number" step="0.5" value={exercise.weight || ''} onChange={(e) => onChange({ ...exercise, weight: e.target.value })} placeholder="60" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
           </div>
         </div>
       )}
 
       {exercise.category === 'cardio' && exercise.exercise && (
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-xs text-gray-500">Czas</label>
-            <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="30min" className="w-full border rounded px-2 py-1 text-sm" />
+            <label className="text-xs text-gray-500 font-medium">Czas (min)</label>
+            <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="30" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Km</label>
-            <input type="number" step="0.1" value={exercise.distance || ''} onChange={(e) => onChange({ ...exercise, distance: e.target.value })} placeholder="5" className="w-full border rounded px-2 py-1 text-sm" />
+            <label className="text-xs text-gray-500 font-medium">Dystans (km)</label>
+            <input type="number" step="0.1" value={exercise.distance || ''} onChange={(e) => onChange({ ...exercise, distance: e.target.value })} placeholder="5" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
           </div>
         </div>
       )}
 
       {exercise.category === 'mobility' && exercise.exercise && (
         <div>
-          <label className="text-xs text-gray-500">Czas (min)</label>
-          <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="20" className="w-full border rounded px-2 py-1 text-sm" />
+          <label className="text-xs text-gray-500 font-medium">Czas (min)</label>
+          <input type="number" value={exercise.duration || ''} onChange={(e) => onChange({ ...exercise, duration: e.target.value })} placeholder="20" className="w-full border-2 rounded-xl px-3 py-2 text-base" />
         </div>
       )}
+    </div>
+  );
+}
+
+// ===========================================
+// MOBILE VIEW - Day Strip + Training List
+// ===========================================
+function MobileView({ trainings, selectedDate, onSelectDate, onAddTraining, onEditTraining, onDeleteTraining, onAddExercise, currentWeekStart }) {
+  const todayKey = formatDateKey(new Date());
+  const selectedKey = formatDateKey(selectedDate);
+  const dayTrainings = trainings[selectedKey] || [];
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(currentWeekStart);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Day Strip */}
+      <div className="bg-white border-b px-2 py-3">
+        <div className="flex justify-between">
+          {weekDays.map((date, i) => {
+            const dk = formatDateKey(date);
+            const isToday = dk === todayKey;
+            const isSelected = dk === selectedKey;
+            const hasTraining = trainings[dk]?.length > 0;
+            
+            return (
+              <button
+                key={i}
+                onClick={() => onSelectDate(date)}
+                className={`flex-1 flex flex-col items-center py-2 rounded-xl mx-0.5 transition-all ${
+                  isSelected 
+                    ? 'bg-blue-600 text-white shadow-lg' 
+                    : isToday 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'hover:bg-gray-100'
+                }`}
+              >
+                <span className={`text-xs font-medium ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                  {DAYS_SHORT[date.getDay()]}
+                </span>
+                <span className={`text-lg font-bold mt-0.5 ${isSelected ? '' : isToday ? 'text-blue-700' : ''}`}>
+                  {date.getDate()}
+                </span>
+                {hasTraining && (
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-blue-500'}`} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selected Date Header */}
+      <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
+        <div>
+          <h2 className="font-bold text-lg">
+            {selectedDate.toLocaleDateString('pl-PL', { weekday: 'long' })}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {selectedDate.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        <button
+          onClick={() => onAddTraining(selectedDate)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 shadow-md hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          Dodaj
+        </button>
+      </div>
+
+      {/* Training List */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {dayTrainings.length > 0 ? (
+          dayTrainings.map(training => (
+            <TrainingCard
+              key={training.id}
+              training={training}
+              dateKey={selectedKey}
+              onEdit={() => onEditTraining(training)}
+              onDelete={onDeleteTraining}
+              onAddExercise={() => onAddExercise(training)}
+              expanded={dayTrainings.length === 1}
+            />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <Dumbbell className="w-16 h-16 mx-auto text-gray-200 mb-4" />
+            <p className="text-gray-500 font-medium">Brak treningów</p>
+            <p className="text-gray-400 text-sm mt-1">Kliknij "Dodaj" aby dodać trening</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ===========================================
+// DESKTOP VIEW - Grid Calendar
+// ===========================================
+function DesktopView({ trainings, currentDate, viewMode, onAddTraining, onEditTraining, onDeleteTraining, onAddExercise }) {
+  const todayKey = formatDateKey(new Date());
+  
+  const getDays = () => {
+    if (viewMode === 'week') return getWeekDays(currentDate);
+    return getMonthDays(currentDate.getFullYear(), currentDate.getMonth());
+  };
+
+  const days = getDays();
+
+  return (
+    <div className="p-2">
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => (
+          <div key={d} className="text-center text-sm font-medium text-gray-500 py-2">{d}</div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {days.map(({ date, currentMonth }, i) => {
+          const dk = formatDateKey(date);
+          const dt = trainings[dk] || [];
+          const isToday = dk === todayKey;
+
+          return (
+            <div
+              key={i}
+              className={`bg-white border rounded-lg overflow-hidden
+                ${viewMode === 'week' ? 'min-h-[400px]' : 'min-h-[100px]'}
+                ${isToday ? 'border-blue-500 border-2' : 'border-gray-200'}
+                ${!currentMonth ? 'opacity-40' : ''}`}
+            >
+              <div className={`flex items-center justify-between px-2 py-1 border-b ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                <span className={`text-sm font-semibold ${isToday ? 'text-blue-600' : ''}`}>{date.getDate()}</span>
+                <button onClick={() => onAddTraining(date)} className="p-1 hover:bg-gray-200 rounded">
+                  <Plus className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+              <div className={`p-1 space-y-1 overflow-y-auto ${viewMode === 'week' ? 'max-h-[350px]' : 'max-h-[60px]'}`}>
+                {viewMode === 'month' ? (
+                  dt.slice(0, 2).map(t => (
+                    <div
+                      key={t.id}
+                      onClick={() => onEditTraining(t, date)}
+                      className="bg-blue-100 text-blue-800 rounded px-2 py-1 text-xs cursor-pointer hover:bg-blue-200 truncate"
+                    >
+                      {t.startTime} {[...new Set(t.exercises.map(e => WORKOUT_CATEGORIES[e.category]?.icon))].join('')}
+                    </div>
+                  ))
+                ) : (
+                  dt.map(t => (
+                    <TrainingCard
+                      key={t.id}
+                      training={t}
+                      dateKey={dk}
+                      onEdit={() => onEditTraining(t, date)}
+                      onDelete={onDeleteTraining}
+                      onAddExercise={() => onAddExercise(t, date)}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -540,19 +756,26 @@ function ExerciseForm({ exercise, onChange, onRemove, index }) {
 function TrainingTracker() {
   const { user, logout } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('week');
   const [trainings, setTrainings] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [editingTraining, setEditingTraining] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   const [form, setForm] = useState({
     startTime: '08:00', duration: '', note: '',
     exercises: [{ category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }]
   });
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -574,21 +797,35 @@ function TrainingTracker() {
     setSaving(false);
   };
 
-  const today = new Date();
-  const todayKey = formatDateKey(today);
-
-  const nav = (dir) => {
-    const d = new Date(currentDate);
-    if (viewMode === 'day') d.setDate(d.getDate() + dir);
-    else if (viewMode === 'week') d.setDate(d.getDate() + dir * 7);
-    else d.setMonth(d.getMonth() + dir);
-    setCurrentDate(d);
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+    d.setHours(0, 0, 0, 0);
+    return d;
   };
 
-  const getDays = () => {
-    if (viewMode === 'day') return [{ date: currentDate, currentMonth: true }];
-    if (viewMode === 'week') return getWeekDays(currentDate);
-    return getMonthDays(currentDate.getFullYear(), currentDate.getMonth());
+  const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
+
+  const nav = (dir) => {
+    if (isMobile) {
+      const newWeekStart = new Date(currentWeekStart);
+      newWeekStart.setDate(newWeekStart.getDate() + dir * 7);
+      setCurrentWeekStart(newWeekStart);
+      setSelectedDate(newWeekStart);
+    } else {
+      const d = new Date(currentDate);
+      if (viewMode === 'week') d.setDate(d.getDate() + dir * 7);
+      else d.setMonth(d.getMonth() + dir);
+      setCurrentDate(d);
+    }
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentDate(today);
+    setSelectedDate(today);
+    setCurrentWeekStart(getWeekStart(today));
   };
 
   const openAdd = (date) => {
@@ -598,13 +835,15 @@ function TrainingTracker() {
     setShowModal(true);
   };
 
-  const openEdit = (t) => {
+  const openEdit = (t, date) => {
+    if (date) setSelectedDate(date);
     setEditingTraining(t);
     setForm({ startTime: t.startTime, duration: t.duration || '', note: t.note || '', exercises: t.exercises.length ? t.exercises : [{ category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }] });
     setShowModal(true);
   };
 
-  const openAddEx = (t) => {
+  const openAddEx = (t, date) => {
+    if (date) setSelectedDate(date);
     setEditingTraining(t);
     setForm({ ...t, exercises: [...t.exercises, { category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }] });
     setShowModal(true);
@@ -632,25 +871,25 @@ function TrainingTracker() {
   };
 
   const title = () => {
-    if (viewMode === 'day') return `${currentDate.getDate()} ${MONTHS[currentDate.getMonth()]}`;
+    if (isMobile) {
+      return MONTHS[currentWeekStart.getMonth()] + ' ' + currentWeekStart.getFullYear();
+    }
     if (viewMode === 'week') {
       const d = getWeekDays(currentDate);
-      return `${d[0].date.getDate()}-${d[6].date.getDate()} ${MONTHS[d[0].date.getMonth()]}`;
+      return `${d[0].date.getDate()}-${d[6].date.getDate()} ${MONTHS[d[0].date.getMonth()].slice(0, 3)}`;
     }
     return `${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   };
 
-  const days = getDays();
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-10 px-2 py-2">
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-1.5">
-            <Dumbbell className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-sm">Notatnik</span>
-            {saving && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
+      <header className="bg-white border-b sticky top-0 z-10 px-3 py-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Dumbbell className="w-6 h-6 text-blue-600" />
+            <span className="font-bold">Notatnik</span>
+            {saving && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
           </div>
           <div className="flex items-center">
             <button onClick={() => setShowStats(true)} className="p-2 text-purple-600">
@@ -663,9 +902,9 @@ function TrainingTracker() {
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 top-full bg-white border rounded-lg shadow-lg py-1 min-w-[150px] z-20">
-                    <div className="px-3 py-2 border-b text-xs text-gray-500 truncate">{user?.email}</div>
-                    <button onClick={() => { logout(); setShowMenu(false); }} className="w-full px-3 py-2 text-left text-sm text-red-600 flex items-center gap-2">
+                  <div className="absolute right-0 top-full bg-white border rounded-xl shadow-lg py-1 min-w-[180px] z-20">
+                    <div className="px-4 py-2 border-b text-sm text-gray-500 truncate">{user?.email}</div>
+                    <button onClick={() => { logout(); setShowMenu(false); }} className="w-full px-4 py-3 text-left text-red-600 flex items-center gap-2 hover:bg-red-50">
                       <LogOut className="w-4 h-4" /> Wyloguj
                     </button>
                   </div>
@@ -675,131 +914,156 @@ function TrainingTracker() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <button onClick={() => nav(-1)} className="p-1"><ChevronLeft className="w-5 h-5" /></button>
-            <button onClick={() => nav(1)} className="p-1"><ChevronRight className="w-5 h-5" /></button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-2 py-0.5 text-xs text-blue-600 font-medium">Dziś</button>
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-1">
+            <button onClick={() => nav(-1)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button onClick={() => nav(1)} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <button onClick={goToToday} className="px-3 py-1.5 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg">
+              Dziś
+            </button>
           </div>
-          <span className="font-semibold text-sm">{title()}</span>
-          <div className="flex bg-gray-100 rounded p-0.5">
-            {[{ id: 'day', l: 'D' }, { id: 'week', l: 'T' }, { id: 'month', l: 'M' }].map(m => (
-              <button key={m.id} onClick={() => { setViewMode(m.id); save(trainings, m.id); }}
-                className={`px-2 py-0.5 rounded text-xs font-medium ${viewMode === m.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'}`}>
-                {m.l}
-              </button>
-            ))}
-          </div>
+          
+          <span className="font-semibold">{title()}</span>
+          
+          {!isMobile && (
+            <div className="flex bg-gray-100 rounded-lg p-0.5">
+              {[{ id: 'week', l: 'Tydzień' }, { id: 'month', l: 'Miesiąc' }].map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => { setViewMode(m.id); save(trainings, m.id); }}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === m.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600'}`}
+                >
+                  {m.l}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {isMobile && <div className="w-20" />}
         </div>
       </header>
 
-      {/* Calendar */}
-      <main className="p-1">
-        {viewMode !== 'day' && (
-          <div className="grid grid-cols-7 gap-px mb-px">
-            {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => (
-              <div key={d} className="text-center text-xs text-gray-500 py-1">{d}</div>
-            ))}
-          </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden">
+        {isMobile ? (
+          <MobileView
+            trainings={trainings}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            onAddTraining={openAdd}
+            onEditTraining={openEdit}
+            onDeleteTraining={deleteTraining}
+            onAddExercise={openAddEx}
+            currentWeekStart={currentWeekStart}
+          />
+        ) : (
+          <DesktopView
+            trainings={trainings}
+            currentDate={currentDate}
+            viewMode={viewMode}
+            onAddTraining={openAdd}
+            onEditTraining={openEdit}
+            onDeleteTraining={deleteTraining}
+            onAddExercise={openAddEx}
+          />
         )}
-
-        <div className={`grid ${viewMode === 'day' ? 'grid-cols-1' : 'grid-cols-7'} gap-px`}>
-          {days.map(({ date, currentMonth }, i) => {
-            const dk = formatDateKey(date);
-            const dt = trainings[dk] || [];
-            const isToday = dk === todayKey;
-
-            return (
-              <div key={i} className={`bg-white border rounded overflow-hidden
-                ${viewMode === 'day' ? 'min-h-[78vh]' : viewMode === 'week' ? 'min-h-[80px]' : 'min-h-[48px]'}
-                ${isToday ? 'border-blue-500 border-2' : 'border-gray-200'}
-                ${!currentMonth ? 'opacity-40' : ''}`}>
-                <div className={`flex items-center justify-between px-1 py-0.5 border-b ${isToday ? 'bg-blue-50' : 'bg-gray-50'}`}>
-                  <span className={`text-xs font-semibold ${isToday ? 'text-blue-600' : ''}`}>{date.getDate()}</span>
-                  <button onClick={() => openAdd(date)} className="p-0.5"><Plus className="w-3 h-3 text-gray-500" /></button>
-                </div>
-                <div className={`p-0.5 space-y-0.5 overflow-y-auto ${viewMode === 'day' ? 'max-h-[73vh]' : viewMode === 'week' ? 'max-h-[60px]' : 'max-h-[26px]'}`}>
-                  {viewMode === 'month' ? (
-                    dt.slice(0, 2).map(t => (
-                      <div key={t.id} onClick={() => { setSelectedDate(date); openEdit(t); }}
-                        className="bg-blue-100 text-blue-800 rounded px-1 py-0.5 text-xs cursor-pointer truncate">
-                        {t.startTime}
-                      </div>
-                    ))
-                  ) : (
-                    dt.map(t => (
-                      <TrainingCard key={t.id} training={t} dateKey={dk}
-                        onEdit={() => { setSelectedDate(date); openEdit(t); }}
-                        onDelete={deleteTraining}
-                        onAddExercise={() => { setSelectedDate(date); openAddEx(t); }} />
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </main>
 
       {/* Stats */}
-      {showStats && <StatsPanel trainings={trainings} currentDate={currentDate} viewMode={viewMode} onClose={() => setShowStats(false)} />}
+      {showStats && <StatsPanel trainings={trainings} currentDate={isMobile ? selectedDate : currentDate} viewMode={viewMode} onClose={() => setShowStats(false)} />}
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm max-h-[88vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-3 border-b">
-              <h3 className="font-semibold text-sm">{editingTraining ? 'Edytuj' : 'Nowy trening'}</h3>
-              <button onClick={() => setShowModal(false)}><X className="w-5 h-5" /></button>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-bold text-lg">{editingTraining ? 'Edytuj trening' : 'Nowy trening'}</h3>
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                <X className="w-6 h-6" />
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-              <div className="flex items-center gap-2 text-gray-600 text-sm">
-                <Calendar className="w-4 h-4" />
-                <span>{selectedDate?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="w-5 h-5" />
+                <span className="font-medium">
+                  {selectedDate?.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-gray-600">Godzina</label>
-                  <input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                    className="w-full border rounded px-2 py-1.5 text-sm" />
+                  <label className="text-sm text-gray-600 font-medium">Godzina</label>
+                  <input 
+                    type="time" 
+                    value={form.startTime} 
+                    onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                    className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                  />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-600">Czas (min)</label>
-                  <input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                    placeholder="60" className="w-full border rounded px-2 py-1.5 text-sm" />
+                  <label className="text-sm text-gray-600 font-medium">Czas trwania (min)</label>
+                  <input 
+                    type="number" 
+                    value={form.duration} 
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                    placeholder="60" 
+                    className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                  />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-gray-600">Notatka</label>
-                <input type="text" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })}
-                  placeholder="Push day..." className="w-full border rounded px-2 py-1.5 text-sm" />
+                <label className="text-sm text-gray-600 font-medium">Notatka</label>
+                <input 
+                  type="text" 
+                  value={form.note} 
+                  onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  placeholder="np. Push day, FBW..." 
+                  className="w-full border-2 rounded-xl px-3 py-2.5 text-base mt-1" 
+                />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-medium text-gray-700">Ćwiczenia</label>
-                  <button onClick={() => setForm({ ...form, exercises: [...form.exercises, { category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }] })}
-                    className="text-xs text-blue-600 flex items-center gap-0.5">
-                    <Plus className="w-3 h-3" /> Dodaj
+                <div className="flex items-center justify-between mb-3">
+                  <label className="font-medium">Ćwiczenia</label>
+                  <button 
+                    onClick={() => setForm({ ...form, exercises: [...form.exercises, { category: 'silownia', subcategory: '', exercise: '', customExercise: '', sets: '', reps: '', weight: '', duration: '', distance: '' }] })}
+                    className="text-blue-600 font-medium flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Dodaj
                   </button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {form.exercises.map((ex, i) => (
-                    <ExerciseForm key={i} exercise={ex} index={i}
+                    <ExerciseForm 
+                      key={i} 
+                      exercise={ex} 
+                      index={i}
                       onChange={(e) => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })}
-                      onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} />
+                      onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} 
+                    />
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="p-3 border-t bg-gray-50 flex gap-2">
-              <button onClick={() => setShowModal(false)} className="flex-1 py-2 border rounded-lg text-sm font-medium">Anuluj</button>
-              <button onClick={saveTraining} disabled={!form.exercises.some(e => e.exercise)}
-                className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+            <div className="p-4 border-t bg-gray-50 flex gap-3">
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="flex-1 py-3 border-2 rounded-xl font-medium"
+              >
+                Anuluj
+              </button>
+              <button 
+                onClick={saveTraining} 
+                disabled={!form.exercises.some(e => e.exercise)}
+                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-md"
+              >
                 Zapisz
               </button>
             </div>
