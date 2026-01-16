@@ -11,8 +11,8 @@ const firebaseConfig = {
   projectId: "notatnik-treningowy-9e1fc",
   storageBucket: "notatnik-treningowy-9e1fc.firebasestorage.app",
   messagingSenderId: "336214735859",
-  appId: "1:336214735859:web:983d2dadcce48055fdb086", 
-  measurementId: "G-4P6YBSG7GN" 
+  appId: "1:336214735859:web:983d2dadcce48055fdb086",
+  measurementId: "G-4P6YBSG7GN"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -90,29 +90,52 @@ function AuthScreen() {
 }
 
 const CATS = {
-  silownia: { name: 'Siłownia', icon: '🏋️', color: 'bg-blue-500', light: 'bg-blue-50 border-blue-200 text-blue-900', subs: [
-    { id: 'klatka', name: 'Klatka', ex: ['Wyciskanie sztangi', 'Wyciskanie hantli', 'Rozpiętki', 'Pompki', 'Inne'] },
-    { id: 'plecy', name: 'Plecy', ex: ['Martwy ciąg', 'Wiosłowanie', 'Podciąganie', 'Ściąganie', 'Inne'] },
-    { id: 'barki', name: 'Barki', ex: ['Military', 'Wznosy', 'Face pulls', 'Inne'] },
-    { id: 'biceps', name: 'Biceps', ex: ['Uginanie sztangi', 'Uginanie hantli', 'Młotki', 'Inne'] },
-    { id: 'triceps', name: 'Triceps', ex: ['Francuskie', 'Pompki wąskie', 'Wyciąg', 'Inne'] },
-    { id: 'nogi', name: 'Nogi', ex: ['Przysiad', 'Wykroki', 'Prasa', 'Hip thrust', 'RDL', 'Inne'] },
-    { id: 'brzuch', name: 'Brzuch', ex: ['Plank', 'Brzuszki', 'Unoszenie nóg', 'Inne'] }
-    { id: 'inne', name: 'Inne', ex: ['Trening ogólny', 'Kalistenika', 'Inne'] }
-  ]},
-  cardio: { name: 'Cardio', icon: '🏃', color: 'bg-green-500', light: 'bg-green-50 border-green-200 text-green-900', subs: [
-    { id: 'bieganie', name: 'Bieganie', ex: ['Bieg', 'Bieżnia', 'Interwały', 'Sprint', 'Inne'] },
-    { id: 'rower', name: 'Rower', ex: ['Stacjonarny', 'Klasyczny', 'Inne'] },
-    { id: 'pływanie', name: 'Pływanie', ex: ['Basen', 'Areobic', 'Inne'] },
-    { id: 'taniec', name: 'Taniec', ex: ['Hip-Hop', 'Towarzyski', 'Nowoczesny', 'Inne'] },
-
-    { id: 'inne', name: 'Inne', ex: ['Orbitrek', 'Skakanka', 'Góry', 'Trekking', 'HIIT', 'Spacer', 'Inne'] }
-  ]},
-  mobility: { name: 'Mobilność', icon: '🧘', color: 'bg-purple-500', light: 'bg-purple-50 border-purple-200 text-purple-900', subs: [
-    { id: 'yoga', name: 'Yoga', ex: ['Vinyasa', 'Hatha', 'Inne'] },
-    { id: 'stretching', name: 'Stretching', ex: ['Ogólne', 'Góra', 'Dół', 'Inne'] }
-    { id: 'inne', name: 'Inne', ex: ['Sztuki walki', 'Drabinka', 'Pilates', 'HIIT', 'Inne'] }
-  ]}
+  silownia: { 
+    name: 'Siłownia', 
+    icon: '🏋️', 
+    color: 'bg-blue-500', 
+    light: 'bg-blue-50 border-blue-200 text-blue-900', 
+    subs: [
+      { id: 'klatka', name: 'Klatka piersiowa', ex: ['Wyciskanie sztangi', 'Wyciskanie hantli', 'Wyciskanie na skosie', 'Rozpiętki', 'Krzyżowanie linek', 'Pompki', 'Maszyna na klatkę', 'Inne'] },
+      { id: 'plecy', name: 'Plecy', ex: ['Martwy ciąg', 'Wiosłowanie sztangą', 'Wiosłowanie hantlem', 'Podciąganie', 'Ściąganie drążka', 'Przyciąganie linki', 'Pullover', 'Hyperextension', 'Inne'] },
+      { id: 'barki', name: 'Barki', ex: ['Wyciskanie military', 'Wyciskanie hantli', 'Wznosy bokiem', 'Wznosy przodem', 'Wznosy tyłem', 'Face pulls', 'Arnoldki', 'Maszyna na barki', 'Inne'] },
+      { id: 'biceps', name: 'Biceps', ex: ['Uginanie sztangi', 'Uginanie hantli', 'Uginanie na modlitewniku', 'Młotki', 'Uginanie linką', 'Koncentracja', 'Inne'] },
+      { id: 'triceps', name: 'Triceps', ex: ['Wyciskanie wąsko', 'Francuskie sztangą', 'Francuskie hantlami', 'Prostowanie na wyciągu', 'Dipy', 'Pompki wąskie', 'Kickback', 'Inne'] },
+      { id: 'nogi', name: 'Nogi', ex: ['Przysiad ze sztangą', 'Przysiad goblet', 'Suwnica', 'Prasa nogami', 'Wykroki', 'Wyprosty nóg', 'Uginanie nóg', 'Hip thrust', 'RDL', 'Martwy na prostych', 'Łydki stojąc', 'Łydki siedząc', 'Inne'] },
+      { id: 'brzuch', name: 'Brzuch', ex: ['Plank', 'Brzuszki', 'Unoszenie nóg', 'Rowerek', 'Russian twist', 'Deska boczna', 'Ab roller', 'Cable crunch', 'Inne'] },
+      { id: 'przedramiona', name: 'Przedramiona', ex: ['Uginanie nadgarstków', 'Reverse curl', 'Farmer walk', 'Zaciskanie gripa', 'Inne'] },
+      { id: 'inne', name: 'Inne', ex: ['Trening obwodowy', 'Kalistenika', 'Crossfit', 'Funkcjonalny', 'Inne'] }
+    ]
+  },
+  cardio: { 
+    name: 'Cardio', 
+    icon: '🏃', 
+    color: 'bg-green-500', 
+    light: 'bg-green-50 border-green-200 text-green-900', 
+    subs: [
+      { id: 'bieganie', name: 'Bieganie', ex: ['Bieg ciągły', 'Bieżnia', 'Interwały', 'Sprint', 'Bieg w terenie', 'Inne'] },
+      { id: 'rower', name: 'Rower', ex: ['Rower stacjonarny', 'Rower klasyczny', 'Rower górski', 'Spinning', 'Inne'] },
+      { id: 'plywanie', name: 'Pływanie', ex: ['Kraul', 'Grzbiet', 'Żabka', 'Motyl', 'Dowolne', 'Inne'] },
+      { id: 'chodzenie', name: 'Chodzenie', ex: ['Spacer', 'Nordic walking', 'Marsz na bieżni', 'Chodzenie po schodach', 'Inne'] },
+      { id: 'taniec', name: 'Taniec', ex: ['Zumba', 'Hip-Hop', 'Towarzyski', 'Nowoczesny', 'Latino', 'Inne'] },
+      { id: 'sporty', name: 'Sporty', ex: ['Piłka nożna', 'Koszykówka', 'Siatkówka', 'Tenis', 'Badminton', 'Squash', 'Inne'] },
+      { id: 'inne', name: 'Inne', ex: ['Orbitrek', 'Wioślarz', 'Skakanka', 'HIIT', 'Trekking', 'Schody', 'Inne'] }
+    ]
+  },
+  mobility: { 
+    name: 'Mobilność', 
+    icon: '🧘', 
+    color: 'bg-purple-500', 
+    light: 'bg-purple-50 border-purple-200 text-purple-900', 
+    subs: [
+      { id: 'yoga', name: 'Yoga', ex: ['Vinyasa', 'Hatha', 'Ashtanga', 'Yin', 'Power yoga', 'Inne'] },
+      { id: 'stretching', name: 'Stretching', ex: ['Rozciąganie całego ciała', 'Rozciąganie górne', 'Rozciąganie dolne', 'Dynamiczne', 'Statyczne', 'PNF', 'Inne'] },
+      { id: 'pilates', name: 'Pilates', ex: ['Mat Pilates', 'Reformer', 'Z piłką', 'Z taśmą', 'Inne'] },
+      { id: 'foam', name: 'Foam rolling', ex: ['Roller plecy', 'Roller nogi', 'Roller pośladki', 'Piłeczka', 'Inne'] },
+      { id: 'walki', name: 'Sztuki walki', ex: ['Boks', 'Kickboxing', 'MMA', 'Karate', 'Judo', 'BJJ', 'Taekwondo', 'Inne'] },
+      { id: 'inne', name: 'Inne', ex: ['Medytacja', 'Ćwiczenia oddechowe', 'Tai Chi', 'Rehabilitacja', 'Inne'] }
+    ]
+  }
 };
 
 const DAYS = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'];
@@ -428,17 +451,128 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
 }
 
 function ExForm({ ex, onChange, onRemove, idx }) {
-  const cat = CATS[ex.cat], sub = cat?.subs.find(s => s.id === ex.sub);
+  const cat = CATS[ex.cat];
+  const sub = cat?.subs.find(s => s.id === ex.sub);
+  
   return (
-    <div className="bg-gray-50 rounded-lg p-3 border space-y-2">
-      <div className="flex items-center justify-between"><span className="text-sm font-medium text-gray-500">#{idx + 1}</span><button onClick={onRemove} className="text-red-500"><Trash2 className="w-4 h-4" /></button></div>
-      <div className="grid grid-cols-3 gap-1">{Object.entries(CATS).map(([k, c]) => <button key={k} onClick={() => onChange({ ...ex, cat: k, sub: '', ex: '' })} className={`p-2 rounded text-center ${ex.cat === k ? `${c.color} text-white` : 'bg-white border'}`}><span className="text-lg">{c.icon}</span><p className="text-xs">{c.name}</p></button>)}</div>
-      {ex.cat && <div className="flex flex-wrap gap-1">{cat?.subs.map(s => <button key={s.id} onClick={() => onChange({ ...ex, sub: s.id, ex: '' })} className={`px-2 py-1 rounded text-xs ${ex.sub === s.id ? 'bg-indigo-600 text-white' : 'bg-white border'}`}>{s.name}</button>)}</div>}
-      {sub && <select value={ex.ex} onChange={e => onChange({ ...ex, ex: e.target.value })} className="w-full border rounded px-2 py-1.5 text-sm"><option value="">Wybierz...</option>{sub.ex.map(e => <option key={e} value={e}>{e}</option>)}</select>}
-      {ex.ex === 'Inne' && <input type="text" value={ex.custom || ''} onChange={e => onChange({ ...ex, custom: e.target.value })} placeholder="Nazwa..." className="w-full border rounded px-2 py-1.5 text-sm" />}
-      {ex.cat === 'silownia' && ex.ex && <div className="grid grid-cols-3 gap-2"><div><label className="text-xs text-gray-500">Serie</label><input type="number" value={ex.sets || ''} onChange={e => onChange({ ...ex, sets: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div><div><label className="text-xs text-gray-500">Powt</label><input type="number" value={ex.reps || ''} onChange={e => onChange({ ...ex, reps: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div><div><label className="text-xs text-gray-500">Kg</label><input type="number" value={ex.weight || ''} onChange={e => onChange({ ...ex, weight: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div></div>}
-      {ex.cat === 'cardio' && ex.ex && <div className="grid grid-cols-2 gap-2"><div><label className="text-xs text-gray-500">Min</label><input type="number" value={ex.dur || ''} onChange={e => onChange({ ...ex, dur: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div><div><label className="text-xs text-gray-500">Km</label><input type="number" value={ex.dist || ''} onChange={e => onChange({ ...ex, dist: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div></div>}
-      {ex.cat === 'mobility' && ex.ex && <div><label className="text-xs text-gray-500">Min</label><input type="number" value={ex.dur || ''} onChange={e => onChange({ ...ex, dur: e.target.value })} className="w-full border rounded px-2 py-1 text-sm" /></div>}
+    <div className="bg-gray-50 rounded-lg p-3 border space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-500">Ćwiczenie #{idx + 1}</span>
+        <button onClick={onRemove} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 className="w-4 h-4" /></button>
+      </div>
+      
+      {/* Kategorie */}
+      <div>
+        <label className="text-xs font-medium text-gray-600 mb-1 block">Kategoria</label>
+        <div className="grid grid-cols-3 gap-1">
+          {Object.entries(CATS).map(([k, c]) => (
+            <button 
+              key={k} 
+              onClick={() => onChange({ ...ex, cat: k, sub: '', ex: '' })} 
+              className={`p-2 rounded text-center transition-colors ${ex.cat === k ? `${c.color} text-white` : 'bg-white border hover:bg-gray-50'}`}
+            >
+              <span className="text-lg">{c.icon}</span>
+              <p className="text-xs mt-0.5">{c.name}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Podkategorie - scrollowalne */}
+      {ex.cat && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Partia / Typ</label>
+          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1 bg-white rounded border">
+            {cat?.subs.map(s => (
+              <button 
+                key={s.id} 
+                onClick={() => onChange({ ...ex, sub: s.id, ex: '' })} 
+                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${ex.sub === s.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Ćwiczenia - dropdown */}
+      {sub && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Ćwiczenie</label>
+          <select 
+            value={ex.ex} 
+            onChange={e => onChange({ ...ex, ex: e.target.value })} 
+            className="w-full border rounded px-3 py-2 text-sm bg-white"
+          >
+            <option value="">Wybierz ćwiczenie...</option>
+            {sub.ex.map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
+        </div>
+      )}
+      
+      {/* Własna nazwa dla "Inne" */}
+      {ex.ex === 'Inne' && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Własna nazwa</label>
+          <input 
+            type="text" 
+            value={ex.custom || ''} 
+            onChange={e => onChange({ ...ex, custom: e.target.value })} 
+            placeholder="Wpisz nazwę ćwiczenia..." 
+            className="w-full border rounded px-3 py-2 text-sm" 
+          />
+        </div>
+      )}
+      
+      {/* Parametry dla siłowni */}
+      {ex.cat === 'silownia' && ex.ex && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Parametry</label>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="text-xs text-gray-500">Serie</label>
+              <input type="number" value={ex.sets || ''} onChange={e => onChange({ ...ex, sets: e.target.value })} placeholder="4" className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500">Powtórzenia</label>
+              <input type="number" value={ex.reps || ''} onChange={e => onChange({ ...ex, reps: e.target.value })} placeholder="12" className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500">Ciężar (kg)</label>
+              <input type="number" value={ex.weight || ''} onChange={e => onChange({ ...ex, weight: e.target.value })} placeholder="50" className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Parametry dla cardio */}
+      {ex.cat === 'cardio' && ex.ex && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Parametry</label>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-500">Czas (min)</label>
+              <input type="number" value={ex.dur || ''} onChange={e => onChange({ ...ex, dur: e.target.value })} placeholder="30" className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500">Dystans (km)</label>
+              <input type="number" step="0.1" value={ex.dist || ''} onChange={e => onChange({ ...ex, dist: e.target.value })} placeholder="5" className="w-full border rounded px-2 py-1.5 text-sm" />
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Parametry dla mobilności */}
+      {ex.cat === 'mobility' && ex.ex && (
+        <div>
+          <label className="text-xs font-medium text-gray-600 mb-1 block">Parametry</label>
+          <div>
+            <label className="text-xs text-gray-500">Czas (min)</label>
+            <input type="number" value={ex.dur || ''} onChange={e => onChange({ ...ex, dur: e.target.value })} placeholder="20" className="w-full border rounded px-2 py-1.5 text-sm" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -684,21 +818,39 @@ function Tracker() {
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
               <div className="p-3 border-b flex items-center justify-between">
-                <div><h3 className="font-bold">{editing ? 'Edytuj' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</p></div>
-                <button onClick={() => setModal(false)}><X className="w-5 h-5" /></button>
+                <div><h3 className="font-bold">{editing ? 'Edytuj trening' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'long', day: 'numeric', month: 'long' })}</p></div>
+                <button onClick={() => setModal(false)} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-3">
                 <div className="grid grid-cols-2 gap-2">
-                  <div><label className="text-xs font-medium text-gray-600">Godzina</label><input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="w-full border rounded px-2 py-1.5 mt-1" /></div>
-                  <div><label className="text-xs font-medium text-gray-600">Czas (min)</label><input type="number" value={form.dur} onChange={e => setForm({ ...form, dur: e.target.value })} placeholder="60" className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+                  <div><label className="text-xs font-medium text-gray-600">Godzina rozpoczęcia</label><input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="w-full border rounded px-3 py-2 mt-1" /></div>
+                  <div><label className="text-xs font-medium text-gray-600">Czas trwania (min)</label><input type="number" value={form.dur} onChange={e => setForm({ ...form, dur: e.target.value })} placeholder="60" className="w-full border rounded px-3 py-2 mt-1" /></div>
                 </div>
-                <div><label className="text-xs font-medium text-gray-600">Notatka</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Push day..." className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+                <div><label className="text-xs font-medium text-gray-600">Notatka (opcjonalnie)</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="np. Push day, FBW..." className="w-full border rounded px-3 py-2 mt-1" /></div>
                 <div>
-                  <div className="flex items-center justify-between mb-2"><label className="text-sm font-medium">Ćwiczenia</label><button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4" />Dodaj</button></div>
-                  <div className="space-y-2">{form.exercises.map((ex, i) => <ExForm key={i} ex={ex} idx={i} onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} />)}</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold">Ćwiczenia</label>
+                    <button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1 hover:bg-indigo-50 px-2 py-1 rounded">
+                      <Plus className="w-4 h-4" />Dodaj kolejne
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {form.exercises.map((ex, i) => (
+                      <ExForm 
+                        key={i} 
+                        ex={ex} 
+                        idx={i} 
+                        onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} 
+                        onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} 
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="p-3 border-t flex gap-2"><button onClick={() => setModal(false)} className="flex-1 py-2 border rounded font-medium">Anuluj</button><button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2 bg-indigo-600 text-white rounded font-medium disabled:opacity-50">Zapisz</button></div>
+              <div className="p-3 border-t flex gap-2">
+                <button onClick={() => setModal(false)} className="flex-1 py-2.5 border rounded-lg font-medium hover:bg-gray-50">Anuluj</button>
+                <button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-indigo-700">Zapisz</button>
+              </div>
             </div>
           </div>
         )}
@@ -758,7 +910,7 @@ function Tracker() {
       
       {mobile && (
         <div 
-          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center z-[9999] cursor-pointer select-none"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center z-[9999] cursor-pointer select-none active:bg-indigo-700"
           onTouchStart={(e) => { e.preventDefault(); handleAddClick(); }}
           onClick={handleAddClick}
         >
@@ -770,21 +922,39 @@ function Tracker() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000] p-4">
           <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-3 border-b flex items-center justify-between">
-              <div><h3 className="font-bold">{editing ? 'Edytuj' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</p></div>
-              <button onClick={() => setModal(false)}><X className="w-5 h-5" /></button>
+              <div><h3 className="font-bold">{editing ? 'Edytuj trening' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'long', day: 'numeric', month: 'long' })}</p></div>
+              <button onClick={() => setModal(false)} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
-                <div><label className="text-xs font-medium text-gray-600">Godzina</label><input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="w-full border rounded px-2 py-1.5 mt-1" /></div>
-                <div><label className="text-xs font-medium text-gray-600">Czas (min)</label><input type="number" value={form.dur} onChange={e => setForm({ ...form, dur: e.target.value })} placeholder="60" className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+                <div><label className="text-xs font-medium text-gray-600">Godzina rozpoczęcia</label><input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} className="w-full border rounded px-3 py-2 mt-1" /></div>
+                <div><label className="text-xs font-medium text-gray-600">Czas trwania (min)</label><input type="number" value={form.dur} onChange={e => setForm({ ...form, dur: e.target.value })} placeholder="60" className="w-full border rounded px-3 py-2 mt-1" /></div>
               </div>
-              <div><label className="text-xs font-medium text-gray-600">Notatka</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Push day..." className="w-full border rounded px-2 py-1.5 mt-1" /></div>
+              <div><label className="text-xs font-medium text-gray-600">Notatka (opcjonalnie)</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="np. Push day, FBW..." className="w-full border rounded px-3 py-2 mt-1" /></div>
               <div>
-                <div className="flex items-center justify-between mb-2"><label className="text-sm font-medium">Ćwiczenia</label><button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4" />Dodaj</button></div>
-                <div className="space-y-2">{form.exercises.map((ex, i) => <ExForm key={i} ex={ex} idx={i} onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} />)}</div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold">Ćwiczenia</label>
+                  <button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1 hover:bg-indigo-50 px-2 py-1 rounded">
+                    <Plus className="w-4 h-4" />Dodaj kolejne
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {form.exercises.map((ex, i) => (
+                    <ExForm 
+                      key={i} 
+                      ex={ex} 
+                      idx={i} 
+                      onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} 
+                      onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} 
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="p-3 border-t flex gap-2"><button onClick={() => setModal(false)} className="flex-1 py-2 border rounded font-medium">Anuluj</button><button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2 bg-indigo-600 text-white rounded font-medium disabled:opacity-50">Zapisz</button></div>
+            <div className="p-3 border-t flex gap-2">
+              <button onClick={() => setModal(false)} className="flex-1 py-2.5 border rounded-lg font-medium hover:bg-gray-50">Anuluj</button>
+              <button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg font-medium disabled:opacity-50 hover:bg-indigo-700">Zapisz</button>
+            </div>
           </div>
         </div>
       )}
