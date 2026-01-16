@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
-import { ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, Activity, Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check, TrendingUp, Award, Zap, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, Activity, Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check, TrendingUp, Award, Zap, GitCompare } from 'lucide-react';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNC14gl1I_RSktGvLb9aCEVrhrxNAwNSA",
@@ -116,18 +116,174 @@ const dk = d => d.toISOString().split('T')[0];
 const getWeek = d => { const s = new Date(d); const day = s.getDay(); s.setDate(s.getDate() - day + (day === 0 ? -6 : 1)); return Array.from({ length: 7 }, (_, i) => { const x = new Date(s); x.setDate(s.getDate() + i); return x; }); };
 const getMonth = (y, m) => { const f = new Date(y, m, 1), l = new Date(y, m + 1, 0), days = [], st = f.getDay() === 0 ? 6 : f.getDay() - 1; for (let i = st - 1; i >= 0; i--) days.push({ d: new Date(y, m, -i), cur: false }); for (let i = 1; i <= l.getDate(); i++) days.push({ d: new Date(y, m, i), cur: true }); while (days.length < 42) days.push({ d: new Date(y, m + 1, days.length - l.getDate() - st + 1), cur: false }); return days; };
 
+// Helper do obliczania statystyk
+function calcStats(data, start, end) {
+  const filtered = Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= start && d <= end; });
+  const allExs = filtered.flatMap(([_, t]) => t.flatMap(x => x.exercises));
+  return {
+    trainings: filtered.reduce((a, [_, t]) => a + t.length, 0),
+    sets: allExs.reduce((a, e) => a + (parseInt(e.sets) || 0), 0),
+    reps: allExs.reduce((a, e) => a + (parseInt(e.sets) || 0) * (parseInt(e.reps) || 0), 0),
+    mins: filtered.reduce((a, [_, t]) => a + t.reduce((b, x) => b + (parseInt(x.dur) || 0), 0), 0),
+    kg: allExs.reduce((a, e) => a + (parseInt(e.sets) || 0) * (parseInt(e.reps) || 0) * (parseFloat(e.weight) || 0), 0),
+    dist: allExs.reduce((a, e) => a + (parseFloat(e.dist) || 0), 0),
+    exercises: allExs
+  };
+}
+
+// ============ COMPARE SCREEN ============
+function CompareScreen({ data, onBack }) {
+  const [period1, setPeriod1] = useState({ type: 'month', start: '', end: '' });
+  const [period2, setPeriod2] = useState({ type: 'prevMonth', start: '', end: '' });
+
+  const getRange = (p) => {
+    const now = new Date();
+    if (p.type === 'week') { const w = getWeek(now); return { s: w[0], e: w[6], label: 'Ten tydzień' }; }
+    if (p.type === 'prevWeek') { const w = getWeek(new Date(now.getTime() - 7*24*60*60*1000)); return { s: w[0], e: w[6], label: 'Poprzedni tydzień' }; }
+    if (p.type === 'month') return { s: new Date(now.getFullYear(), now.getMonth(), 1), e: new Date(now.getFullYear(), now.getMonth() + 1, 0), label: 'Ten miesiąc' };
+    if (p.type === 'prevMonth') return { s: new Date(now.getFullYear(), now.getMonth() - 1, 1), e: new Date(now.getFullYear(), now.getMonth(), 0), label: 'Poprzedni miesiąc' };
+    if (p.type === 'year') return { s: new Date(now.getFullYear(), 0, 1), e: new Date(now.getFullYear(), 11, 31), label: 'Ten rok' };
+    if (p.type === 'prevYear') return { s: new Date(now.getFullYear() - 1, 0, 1), e: new Date(now.getFullYear() - 1, 11, 31), label: 'Poprzedni rok' };
+    if (p.type === 'custom' && p.start && p.end) return { s: new Date(p.start), e: new Date(p.end), label: `${p.start} - ${p.end}` };
+    return { s: now, e: now, label: '-' };
+  };
+
+  const r1 = getRange(period1);
+  const r2 = getRange(period2);
+  const s1 = calcStats(data, r1.s, r1.e);
+  const s2 = calcStats(data, r2.s, r2.e);
+
+  const diff = (a, b) => {
+    if (b === 0) return a > 0 ? 100 : 0;
+    return Math.round(((a - b) / b) * 100);
+  };
+
+  const DiffBadge = ({ val }) => {
+    if (val === 0) return <span className="text-gray-400 text-xs">0%</span>;
+    return <span className={`text-xs font-semibold ${val > 0 ? 'text-green-600' : 'text-red-600'}`}>{val > 0 ? '+' : ''}{val}%</span>;
+  };
+
+  const periods = [
+    { id: 'week', label: 'Ten tydzień' },
+    { id: 'prevWeek', label: 'Poprzedni tydzień' },
+    { id: 'month', label: 'Ten miesiąc' },
+    { id: 'prevMonth', label: 'Poprzedni miesiąc' },
+    { id: 'year', label: 'Ten rok' },
+    { id: 'prevYear', label: 'Poprzedni rok' },
+    { id: 'custom', label: 'Własny zakres' },
+  ];
+
+  return (
+    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+      <header className="bg-white border-b flex-shrink-0">
+        <div className="px-4 py-3 flex items-center gap-3">
+          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
+          <div className="flex items-center gap-2"><GitCompare className="w-6 h-6 text-indigo-600" /><h1 className="text-xl font-bold">Porównanie</h1></div>
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-4">
+        {/* Period 1 */}
+        <div className="bg-white rounded-xl p-4 mb-3 shadow-sm">
+          <h3 className="font-semibold mb-2 text-indigo-600">Okres 1</h3>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {periods.map(p => (
+              <button key={p.id} onClick={() => setPeriod1({ ...period1, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period1.type === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
+            ))}
+          </div>
+          {period1.type === 'custom' && (
+            <div className="flex gap-2 mt-2">
+              <input type="date" value={period1.start} onChange={e => setPeriod1({ ...period1, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
+              <input type="date" value={period1.end} onChange={e => setPeriod1({ ...period1, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-1">{r1.s.toLocaleDateString('pl')} — {r1.e.toLocaleDateString('pl')}</p>
+        </div>
+
+        {/* Period 2 */}
+        <div className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <h3 className="font-semibold mb-2 text-purple-600">Okres 2</h3>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {periods.map(p => (
+              <button key={p.id} onClick={() => setPeriod2({ ...period2, type: p.id })} className={`px-2 py-1 rounded text-xs font-medium ${period2.type === p.id ? 'bg-purple-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
+            ))}
+          </div>
+          {period2.type === 'custom' && (
+            <div className="flex gap-2 mt-2">
+              <input type="date" value={period2.start} onChange={e => setPeriod2({ ...period2, start: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
+              <input type="date" value={period2.end} onChange={e => setPeriod2({ ...period2, end: e.target.value })} className="flex-1 border rounded px-2 py-1 text-sm" />
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-1">{r2.s.toLocaleDateString('pl')} — {r2.e.toLocaleDateString('pl')}</p>
+        </div>
+
+        {/* Comparison table */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="grid grid-cols-4 text-xs font-semibold border-b">
+            <div className="p-3 bg-gray-50">Metryka</div>
+            <div className="p-3 bg-indigo-50 text-indigo-700 text-center">Okres 1</div>
+            <div className="p-3 bg-purple-50 text-purple-700 text-center">Okres 2</div>
+            <div className="p-3 bg-gray-50 text-center">Różnica</div>
+          </div>
+          
+          {[
+            { label: 'Treningi', k: 'trainings', unit: '' },
+            { label: 'Serie', k: 'sets', unit: '' },
+            { label: 'Powtórzenia', k: 'reps', unit: '' },
+            { label: 'Czas', k: 'mins', unit: ' min' },
+            { label: 'Tonaż', k: 'kg', unit: ' kg', div: 1 },
+            { label: 'Dystans', k: 'dist', unit: ' km' },
+          ].map(({ label, k, unit, div }) => (
+            <div key={k} className="grid grid-cols-4 text-sm border-b last:border-0">
+              <div className="p-3 font-medium">{label}</div>
+              <div className="p-3 text-center text-indigo-600 font-semibold">{div ? (s1[k]/div).toFixed(0) : s1[k]}{unit}</div>
+              <div className="p-3 text-center text-purple-600 font-semibold">{div ? (s2[k]/div).toFixed(0) : s2[k]}{unit}</div>
+              <div className="p-3 text-center"><DiffBadge val={diff(s1[k], s2[k])} /></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Visual comparison */}
+        <div className="mt-4 bg-white rounded-xl p-4 shadow-sm">
+          <h3 className="font-semibold mb-3">📊 Wizualne porównanie</h3>
+          {[
+            { label: 'Treningi', v1: s1.trainings, v2: s2.trainings, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
+            { label: 'Serie', v1: s1.sets, v2: s2.sets, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
+            { label: 'Czas (min)', v1: s1.mins, v2: s2.mins, color1: 'bg-indigo-500', color2: 'bg-purple-500' },
+          ].map(({ label, v1, v2, color1, color2 }) => {
+            const max = Math.max(v1, v2, 1);
+            return (
+              <div key={label} className="mb-3">
+                <div className="flex justify-between text-xs mb-1">
+                  <span>{label}</span>
+                  <span>{v1} vs {v2}</span>
+                </div>
+                <div className="flex gap-1">
+                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div className={`h-full ${color1}`} style={{ width: `${(v1/max)*100}%` }} />
+                  </div>
+                  <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div className={`h-full ${color2}`} style={{ width: `${(v2/max)*100}%` }} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============ STATS SCREEN ============
-function StatsScreen({ data, onBack }) {
+function StatsScreen({ data, onBack, onCompare }) {
   const [period, setPeriod] = useState('month');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   
   const getRange = () => {
     const now = new Date();
-    if (period === 'week') {
-      const week = getWeek(now);
-      return { s: week[0], e: week[6] };
-    }
+    if (period === 'week') { const w = getWeek(now); return { s: w[0], e: w[6] }; }
     if (period === 'month') return { s: new Date(now.getFullYear(), now.getMonth(), 1), e: new Date(now.getFullYear(), now.getMonth() + 1, 0) };
     if (period === 'year') return { s: new Date(now.getFullYear(), 0, 1), e: new Date(now.getFullYear(), 11, 31) };
     if (period === 'all') return { s: new Date(2020, 0, 1), e: now };
@@ -136,27 +292,31 @@ function StatsScreen({ data, onBack }) {
   };
 
   const { s, e } = getRange();
-  const filtered = Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= s && d <= e; });
-  const allExs = filtered.flatMap(([_, t]) => t.flatMap(x => x.exercises));
+  const stats = calcStats(data, s, e);
+  const { trainings: totalTrainings, sets: totalSets, reps: totalReps, mins: totalMins, kg: totalKg, dist: totalDist, exercises: allExs } = stats;
   
-  const totalTrainings = filtered.reduce((a, [_, t]) => a + t.length, 0);
-  const totalSets = allExs.reduce((a, e) => a + (parseInt(e.sets) || 0), 0);
-  const totalReps = allExs.reduce((a, e) => a + (parseInt(e.sets) || 0) * (parseInt(e.reps) || 0), 0);
-  const totalMins = filtered.reduce((a, [_, t]) => a + t.reduce((b, x) => b + (parseInt(x.dur) || 0), 0), 0);
-  const totalKg = allExs.reduce((a, e) => a + (parseInt(e.sets) || 0) * (parseInt(e.reps) || 0) * (parseFloat(e.weight) || 0), 0);
-  const totalDist = allExs.reduce((a, e) => a + (parseFloat(e.dist) || 0), 0);
-  
-  const cats = {}; allExs.forEach(e => { cats[e.cat] = (cats[e.cat] || 0) + 1; });
-  const exCount = {}; allExs.forEach(e => { const name = e.ex === 'Inne' ? e.custom : e.ex; if (name) exCount[name] = (exCount[name] || 0) + 1; });
+  const cats = {}; allExs.forEach(ex => { cats[ex.cat] = (cats[ex.cat] || 0) + 1; });
+  const exCount = {}; allExs.forEach(ex => { const name = ex.ex === 'Inne' ? ex.custom : ex.ex; if (name) exCount[name] = (exCount[name] || 0) + 1; });
   const topExercises = Object.entries(exCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const dayCount = {}; filtered.forEach(([k]) => { const d = new Date(k).getDay(); dayCount[d] = (dayCount[d] || 0) + 1; });
+  
+  const dayCount = {};
+  Object.entries(data).filter(([k]) => { const d = new Date(k); return d >= s && d <= e; }).forEach(([k]) => {
+    const d = new Date(k).getDay();
+    dayCount[d] = (dayCount[d] || 0) + 1;
+  });
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       <header className="bg-white border-b flex-shrink-0">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
-          <div className="flex items-center gap-2"><BarChart3 className="w-6 h-6 text-indigo-600" /><h1 className="text-xl font-bold">Statystyki</h1></div>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
+            <div className="flex items-center gap-2"><BarChart3 className="w-6 h-6 text-indigo-600" /><h1 className="text-xl font-bold">Statystyki</h1></div>
+          </div>
+          <button onClick={onCompare} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg flex items-center gap-1 text-sm font-medium">
+            <GitCompare className="w-5 h-5" />
+            <span className="hidden sm:inline">Porównaj</span>
+          </button>
         </div>
       </header>
 
@@ -427,23 +587,32 @@ function MobileMonth({ data, date, sel, setSel, onDayClick }) {
       <div className="grid grid-cols-7 gap-1 flex-1">
         {days.map(({ d, cur }, i) => {
           const k = dk(d), t = data[k] || [], isT = k === today, isS = k === selKey;
+          const hasTraining = t.length > 0;
           return (
             <div
               key={i}
-              onClick={() => { setSel(d); if (t.length > 0) onDayClick(d); }}
-              className={`rounded-lg flex flex-col items-center justify-center p-1 cursor-pointer
-                ${isT ? 'bg-indigo-100 border-2 border-indigo-500' : isS ? 'bg-indigo-50 border border-indigo-300' : 'bg-white border border-gray-200'}
+              onClick={() => { setSel(d); if (hasTraining) onDayClick(d); }}
+              className={`rounded-lg flex flex-col items-center justify-start p-1 cursor-pointer relative
+                ${isT ? 'bg-indigo-100 border-2 border-indigo-500' : isS ? 'bg-indigo-50 border-2 border-indigo-300' : 'bg-white border border-gray-200'}
                 ${!cur ? 'opacity-40' : ''}`}
             >
-              <span className={`text-sm font-semibold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
-              {t.length > 0 && (
-                <div className="flex gap-0.5 mt-0.5">
-                  {[...new Set(t.flatMap(tr => tr.exercises.map(e => e.cat)))].slice(0, 3).map(c => (
-                    <span key={c} className="text-xs">{CATS[c]?.icon}</span>
-                  ))}
+              <span className={`text-sm font-bold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
+              {hasTraining && (
+                <div className="flex flex-col items-center mt-0.5">
+                  <div className="flex gap-0.5">
+                    {[...new Set(t.flatMap(tr => tr.exercises.map(e => e.cat)))].slice(0, 2).map(c => (
+                      <span key={c} className="text-xs leading-none">{CATS[c]?.icon}</span>
+                    ))}
+                  </div>
+                  {/* Kropki zamiast liczby */}
+                  <div className="flex gap-0.5 mt-0.5">
+                    {t.slice(0, 3).map((_, j) => (
+                      <div key={j} className="w-1 h-1 rounded-full bg-indigo-500" />
+                    ))}
+                    {t.length > 3 && <span className="text-[8px] text-indigo-500">+</span>}
+                  </div>
                 </div>
               )}
-              {t.length > 0 && <span className="text-xs text-indigo-600 font-medium">{t.length}</span>}
             </div>
           );
         })}
@@ -586,8 +755,11 @@ function Tracker() {
       ? `${getWeek(date)[0].getDate()}-${getWeek(date)[6].getDate()} ${MONTHS_SHORT[getWeek(date)[0].getMonth()]} ${getWeek(date)[0].getFullYear()}` 
       : `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 
+  // Compare screen
+  if (screen === 'compare') return <CompareScreen data={data} onBack={() => setScreen('stats')} />;
+  
   // Stats screen
-  if (screen === 'stats') return <StatsScreen data={data} onBack={() => setScreen('calendar')} />;
+  if (screen === 'stats') return <StatsScreen data={data} onBack={() => setScreen('calendar')} onCompare={() => setScreen('compare')} />;
 
   // Day view screen
   if (screen === 'day') {
@@ -651,7 +823,6 @@ function Tracker() {
             <button onClick={goToday} className="px-2 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded">Dziś</button>
           </div>
           <span className="font-semibold text-sm">{title}</span>
-          {/* Przełącznik widoków - działa na mobile i desktop */}
           <div className="flex bg-white border rounded p-0.5">
             {['week', 'month'].map(m => (
               <button key={m} onClick={() => { setMode(m); save(data, m); }} className={`px-2 py-1 rounded text-xs font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}>
@@ -672,8 +843,12 @@ function Tracker() {
         )}
       </main>
       
+      {/* FAB - fixed z-index and proper event */}
       {mobile && (
-        <button onClick={() => openAdd(sel)} className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center">
+        <button 
+          onClick={(e) => { e.stopPropagation(); openAdd(sel); }} 
+          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center z-50 active:bg-indigo-700"
+        >
           <Plus className="w-6 h-6" />
         </button>
       )}
