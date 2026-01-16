@@ -23,12 +23,13 @@ import {
 // 🔥 FIREBASE CONFIG - UZUPEŁNIJ SWOIMI DANYMI
 // ===========================================
 const firebaseConfig = {
-  apiKey: "TWOJ_API_KEY",
-  authDomain: "TWOJ_PROJEKT.firebaseapp.com",
-  projectId: "TWOJ_PROJEKT",
-  storageBucket: "TWOJ_PROJEKT.appspot.com",
-  messagingSenderId: "TWOJ_SENDER_ID",
-  appId: "TWOJ_APP_ID"
+  const firebaseConfig = {
+  apiKey: "AIzaSyBNC14gl1I_RSktGvLb9aCEVrhrxNAwNSA",
+  authDomain: "notatnik-treningowy-9e1fc.firebaseapp.com",
+  projectId: "notatnik-treningowy-9e1fc",
+  storageBucket: "notatnik-treningowy-9e1fc.firebasestorage.app",
+  messagingSenderId: "336214735859",
+  appId: "1:336214735859:web:983d2dadcce48055fdb086"
 };
 
 // Initialize Firebase
