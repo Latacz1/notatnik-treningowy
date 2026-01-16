@@ -106,7 +106,7 @@ const CATS = {
     { id: 'pływanie', name: 'Pływanie', ex: ['Basen', 'Areobic', 'Inne'] },
     { id: 'taniec', name: 'Taniec', ex: ['Hip-Hop', 'Towarzyski', 'Nowoczesny', 'Inne'] },
 
-    { id: 'inne', name: 'Inne', ex: ['Orbitrek', 'Skakanka', 'HIIT', 'Spacer', 'Inne'] }
+    { id: 'inne', name: 'Inne', ex: ['Orbitrek', 'Skakanka', 'Góry', 'Trekking', 'HIIT', 'Spacer', 'Inne'] }
   ]},
   mobility: { name: 'Mobilność', icon: '🧘', color: 'bg-purple-500', light: 'bg-purple-50 border-purple-200 text-purple-900', subs: [
     { id: 'yoga', name: 'Yoga', ex: ['Vinyasa', 'Hatha', 'Inne'] },
