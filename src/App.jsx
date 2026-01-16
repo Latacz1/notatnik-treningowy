@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
-import { ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, Activity, Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check, TrendingUp, Award, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Dumbbell, Calendar, ChevronDown, ChevronUp, Trash2, Edit2, BarChart3, Activity, Timer, Target, Flame, LogOut, Mail, Lock, Loader2, Menu, ArrowLeft, Check, TrendingUp, Award, Zap, CalendarDays } from 'lucide-react';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNC14gl1I_RSktGvLb9aCEVrhrxNAwNSA",
@@ -128,18 +128,10 @@ function StatsScreen({ data, onBack }) {
       const week = getWeek(now);
       return { s: week[0], e: week[6] };
     }
-    if (period === 'month') {
-      return { s: new Date(now.getFullYear(), now.getMonth(), 1), e: new Date(now.getFullYear(), now.getMonth() + 1, 0) };
-    }
-    if (period === 'year') {
-      return { s: new Date(now.getFullYear(), 0, 1), e: new Date(now.getFullYear(), 11, 31) };
-    }
-    if (period === 'all') {
-      return { s: new Date(2020, 0, 1), e: now };
-    }
-    if (period === 'custom' && customStart && customEnd) {
-      return { s: new Date(customStart), e: new Date(customEnd) };
-    }
+    if (period === 'month') return { s: new Date(now.getFullYear(), now.getMonth(), 1), e: new Date(now.getFullYear(), now.getMonth() + 1, 0) };
+    if (period === 'year') return { s: new Date(now.getFullYear(), 0, 1), e: new Date(now.getFullYear(), 11, 31) };
+    if (period === 'all') return { s: new Date(2020, 0, 1), e: now };
+    if (period === 'custom' && customStart && customEnd) return { s: new Date(customStart), e: new Date(customEnd) };
     return { s: new Date(now.getFullYear(), now.getMonth(), 1), e: now };
   };
 
@@ -154,55 +146,26 @@ function StatsScreen({ data, onBack }) {
   const totalKg = allExs.reduce((a, e) => a + (parseInt(e.sets) || 0) * (parseInt(e.reps) || 0) * (parseFloat(e.weight) || 0), 0);
   const totalDist = allExs.reduce((a, e) => a + (parseFloat(e.dist) || 0), 0);
   
-  const cats = {};
-  allExs.forEach(e => { cats[e.cat] = (cats[e.cat] || 0) + 1; });
-  
-  const exCount = {};
-  allExs.forEach(e => { 
-    const name = e.ex === 'Inne' ? e.custom : e.ex;
-    if (name) exCount[name] = (exCount[name] || 0) + 1; 
-  });
+  const cats = {}; allExs.forEach(e => { cats[e.cat] = (cats[e.cat] || 0) + 1; });
+  const exCount = {}; allExs.forEach(e => { const name = e.ex === 'Inne' ? e.custom : e.ex; if (name) exCount[name] = (exCount[name] || 0) + 1; });
   const topExercises = Object.entries(exCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  
-  const dayCount = {};
-  filtered.forEach(([k]) => {
-    const d = new Date(k).getDay();
-    dayCount[d] = (dayCount[d] || 0) + 1;
-  });
+  const dayCount = {}; filtered.forEach(([k]) => { const d = new Date(k).getDay(); dayCount[d] = (dayCount[d] || 0) + 1; });
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       <header className="bg-white border-b flex-shrink-0">
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-xl font-bold">Statystyki</h1>
-          </div>
+          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
+          <div className="flex items-center gap-2"><BarChart3 className="w-6 h-6 text-indigo-600" /><h1 className="text-xl font-bold">Statystyki</h1></div>
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Period selector */}
         <div className="bg-white rounded-xl p-4 mb-4 shadow-sm">
           <h3 className="font-semibold mb-3">Okres</h3>
           <div className="flex flex-wrap gap-2 mb-3">
-            {[
-              { id: 'week', label: 'Ten tydzień' },
-              { id: 'month', label: 'Ten miesiąc' },
-              { id: 'year', label: 'Ten rok' },
-              { id: 'all', label: 'Wszystko' },
-              { id: 'custom', label: 'Własny' },
-            ].map(p => (
-              <button
-                key={p.id}
-                onClick={() => setPeriod(p.id)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium ${period === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-              >
-                {p.label}
-              </button>
+            {[{ id: 'week', label: 'Tydzień' }, { id: 'month', label: 'Miesiąc' }, { id: 'year', label: 'Rok' }, { id: 'all', label: 'Wszystko' }, { id: 'custom', label: 'Własny' }].map(p => (
+              <button key={p.id} onClick={() => setPeriod(p.id)} className={`px-3 py-2 rounded-lg text-sm font-medium ${period === p.id ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>{p.label}</button>
             ))}
           </div>
           {period === 'custom' && (
@@ -212,90 +175,63 @@ function StatsScreen({ data, onBack }) {
               <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="flex-1 border rounded-lg px-3 py-2 text-sm" />
             </div>
           )}
-          <p className="text-sm text-gray-500 mt-2">
-            {s.toLocaleDateString('pl')} — {e.toLocaleDateString('pl')}
-          </p>
+          <p className="text-sm text-gray-500 mt-2">{s.toLocaleDateString('pl')} — {e.toLocaleDateString('pl')}</p>
         </div>
 
-        {/* Main stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-            <Activity className="w-6 h-6 mb-2 opacity-80" />
-            <p className="text-3xl font-bold">{totalTrainings}</p>
-            <p className="text-sm opacity-80">Treningów</p>
+            <Activity className="w-5 h-5 mb-1 opacity-80" />
+            <p className="text-2xl font-bold">{totalTrainings}</p>
+            <p className="text-xs opacity-80">Treningów</p>
           </div>
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white">
-            <Target className="w-6 h-6 mb-2 opacity-80" />
-            <p className="text-3xl font-bold">{totalSets}</p>
-            <p className="text-sm opacity-80">Serii</p>
+            <Target className="w-5 h-5 mb-1 opacity-80" />
+            <p className="text-2xl font-bold">{totalSets}</p>
+            <p className="text-xs opacity-80">Serii</p>
           </div>
           <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white">
-            <Timer className="w-6 h-6 mb-2 opacity-80" />
-            <p className="text-3xl font-bold">{totalMins}</p>
-            <p className="text-sm opacity-80">Minut</p>
+            <Timer className="w-5 h-5 mb-1 opacity-80" />
+            <p className="text-2xl font-bold">{totalMins}</p>
+            <p className="text-xs opacity-80">Minut</p>
           </div>
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-            <Zap className="w-6 h-6 mb-2 opacity-80" />
-            <p className="text-3xl font-bold">{totalReps}</p>
-            <p className="text-sm opacity-80">Powtórzeń</p>
+            <Zap className="w-5 h-5 mb-1 opacity-80" />
+            <p className="text-2xl font-bold">{totalReps}</p>
+            <p className="text-xs opacity-80">Powtórzeń</p>
           </div>
         </div>
 
-        {/* Tonnage & Distance */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-5 h-5 text-red-500" />
-              <span className="font-semibold">Tonaż</span>
-            </div>
-            <p className="text-2xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">ton</span></p>
+            <div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-500" /><span className="font-semibold text-sm">Tonaż</span></div>
+            <p className="text-xl font-bold">{(totalKg / 1000).toFixed(1)} <span className="text-sm font-normal text-gray-500">t</span></p>
           </div>
           <div className="bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-1">
-              <Award className="w-5 h-5 text-emerald-500" />
-              <span className="font-semibold">Dystans</span>
-            </div>
-            <p className="text-2xl font-bold">{totalDist.toFixed(1)} <span className="text-sm font-normal text-gray-500">km</span></p>
+            <div className="flex items-center gap-2 mb-1"><Award className="w-4 h-4 text-emerald-500" /><span className="font-semibold text-sm">Dystans</span></div>
+            <p className="text-xl font-bold">{totalDist.toFixed(1)} <span className="text-sm font-normal text-gray-500">km</span></p>
           </div>
         </div>
 
-        {/* Categories */}
         {Object.keys(cats).length > 0 && (
           <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Flame className="w-5 h-5 text-orange-500" /> Kategorie
-            </h3>
-            <div className="space-y-3">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" />Kategorie</h3>
+            <div className="space-y-2">
               {Object.entries(cats).sort((a, b) => b[1] - a[1]).map(([c, n]) => {
-                const cat = CATS[c];
-                const pct = allExs.length ? Math.round((n / allExs.length) * 100) : 0;
-                return (
-                  <div key={c}>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="flex items-center gap-2">{cat?.icon} {cat?.name}</span>
-                      <span className="font-semibold">{pct}% ({n})</span>
-                    </div>
-                    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                      <div className={`h-full ${cat?.color}`} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
+                const cat = CATS[c]; const pct = allExs.length ? Math.round((n / allExs.length) * 100) : 0;
+                return <div key={c}><div className="flex items-center justify-between text-sm mb-1"><span>{cat?.icon} {cat?.name}</span><span className="font-semibold">{pct}%</span></div><div className="h-2 bg-gray-200 rounded-full"><div className={`h-full rounded-full ${cat?.color}`} style={{ width: `${pct}%` }} /></div></div>;
               })}
             </div>
           </div>
         )}
 
-        {/* Top exercises */}
         {topExercises.length > 0 && (
           <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
             <h3 className="font-semibold mb-3">🏆 Top ćwiczenia</h3>
             <div className="space-y-2">
               {topExercises.map(([name, count], i) => (
                 <div key={name} className="flex items-center gap-3">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-gray-300' : i === 2 ? 'bg-orange-400' : 'bg-gray-100'}`}>
-                    {i + 1}
-                  </span>
-                  <span className="flex-1 truncate">{name}</span>
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-gray-300' : i === 2 ? 'bg-orange-400' : 'bg-gray-100'}`}>{i + 1}</span>
+                  <span className="flex-1 truncate text-sm">{name}</span>
                   <span className="text-sm text-gray-500">{count}x</span>
                 </div>
               ))}
@@ -303,36 +239,17 @@ function StatsScreen({ data, onBack }) {
           </div>
         )}
 
-        {/* Days distribution */}
         <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
           <h3 className="font-semibold mb-3">📅 Dni treningowe</h3>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5, 6, 0].map(d => {
-              const count = dayCount[d] || 0;
-              const max = Math.max(...Object.values(dayCount), 1);
-              const h = Math.round((count / max) * 100);
-              return (
-                <div key={d} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full h-20 bg-gray-100 rounded relative">
-                    <div 
-                      className="absolute bottom-0 w-full bg-indigo-500 rounded"
-                      style={{ height: `${h}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500">{DAYS[d]}</span>
-                  <span className="text-xs font-semibold">{count}</span>
-                </div>
-              );
+              const count = dayCount[d] || 0; const max = Math.max(...Object.values(dayCount), 1); const h = Math.round((count / max) * 100);
+              return <div key={d} className="flex-1 flex flex-col items-center gap-1"><div className="w-full h-16 bg-gray-100 rounded relative"><div className="absolute bottom-0 w-full bg-indigo-500 rounded" style={{ height: `${h}%` }} /></div><span className="text-xs text-gray-500">{DAYS[d]}</span><span className="text-xs font-semibold">{count}</span></div>;
             })}
           </div>
         </div>
 
-        {totalTrainings === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-            <p className="text-lg">Brak danych w wybranym okresie</p>
-          </div>
-        )}
+        {totalTrainings === 0 && <div className="text-center py-12 text-gray-400"><BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-30" /><p>Brak danych</p></div>}
       </div>
     </div>
   );
@@ -348,19 +265,14 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
       <header className="bg-white border-b flex-shrink-0">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg"><ArrowLeft className="w-5 h-5" /></button>
             <div>
-              <h1 className="text-xl font-bold">{DAYS_FULL[date.getDay()]}</h1>
+              <h1 className="text-lg font-bold">{DAYS_FULL[date.getDay()]}</h1>
               <p className="text-gray-500 text-sm">{date.getDate()} {MONTHS[date.getMonth()]} {date.getFullYear()}</p>
             </div>
           </div>
-          <button 
-            onClick={() => onAdd(date)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" /> Dodaj
+          <button onClick={() => onAdd(date)} className="bg-indigo-600 text-white px-3 py-2 rounded-lg font-medium flex items-center gap-1 text-sm">
+            <Plus className="w-4 h-4" />Dodaj
           </button>
         </div>
       </header>
@@ -370,80 +282,55 @@ function DayView({ data, date, onBack, onEdit, onDelete, onAdd, onAddEx }) {
           <div className="space-y-4">
             {trainings.map(t => (
               <div key={t.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                {/* Training header */}
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <span className="text-xl font-bold">{t.startTime.split(':')[0]}</span>
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <span className="text-lg font-bold">{t.startTime.split(':')[0]}</span>
                       </div>
                       <div>
-                        <p className="font-bold text-lg">{t.startTime}</p>
-                        {t.dur && <p className="text-white/80 text-sm">{t.dur} minut</p>}
+                        <p className="font-bold">{t.startTime}</p>
+                        {t.dur && <p className="text-white/80 text-sm">{t.dur} min</p>}
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      {[...new Set(t.exercises.map(e => e.cat))].map(c => (
-                        <span key={c} className="text-2xl">{CATS[c]?.icon}</span>
-                      ))}
-                    </div>
+                    <div className="flex gap-1">{[...new Set(t.exercises.map(e => e.cat))].map(c => <span key={c} className="text-xl">{CATS[c]?.icon}</span>)}</div>
                   </div>
                   {t.note && <p className="mt-2 bg-white/20 rounded-lg px-3 py-2 text-sm">📝 {t.note}</p>}
                 </div>
 
-                {/* Exercises */}
-                <div className="p-4 space-y-3">
+                <div className="p-3 space-y-2">
                   {t.exercises.map((ex, i) => {
-                    const cat = CATS[ex.cat];
-                    const name = ex.ex === 'Inne' ? ex.custom : ex.ex;
+                    const cat = CATS[ex.cat]; const name = ex.ex === 'Inne' ? ex.custom : ex.ex;
                     return (
                       <div key={i} className={`${cat?.light} border rounded-lg p-3`}>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xl">{cat?.icon}</span>
-                          <span className="font-semibold">{name}</span>
-                        </div>
+                        <div className="flex items-center gap-2 mb-2"><span className="text-lg">{cat?.icon}</span><span className="font-semibold">{name}</span></div>
                         <div className="flex flex-wrap gap-2">
-                          {ex.sets && <span className="bg-white px-3 py-1 rounded-full text-sm">{ex.sets} serii</span>}
-                          {ex.reps && <span className="bg-white px-3 py-1 rounded-full text-sm">{ex.reps} powt.</span>}
-                          {ex.weight && <span className="bg-white px-3 py-1 rounded-full text-sm font-semibold">{ex.weight} kg</span>}
-                          {ex.dur && <span className="bg-white px-3 py-1 rounded-full text-sm">{ex.dur} min</span>}
-                          {ex.dist && <span className="bg-white px-3 py-1 rounded-full text-sm">{ex.dist} km</span>}
+                          {ex.sets && <span className="bg-white px-2 py-1 rounded text-sm">{ex.sets} serii</span>}
+                          {ex.reps && <span className="bg-white px-2 py-1 rounded text-sm">{ex.reps} powt.</span>}
+                          {ex.weight && <span className="bg-white px-2 py-1 rounded text-sm font-semibold">{ex.weight} kg</span>}
+                          {ex.dur && <span className="bg-white px-2 py-1 rounded text-sm">{ex.dur} min</span>}
+                          {ex.dist && <span className="bg-white px-2 py-1 rounded text-sm">{ex.dist} km</span>}
                         </div>
-                        {ex.sets && ex.reps && ex.weight && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            Tonaż: {(parseInt(ex.sets) * parseInt(ex.reps) * parseFloat(ex.weight)).toFixed(0)} kg
-                          </p>
-                        )}
+                        {ex.sets && ex.reps && ex.weight && <p className="text-xs text-gray-500 mt-2">Tonaż: {(parseInt(ex.sets) * parseInt(ex.reps) * parseFloat(ex.weight)).toFixed(0)} kg</p>}
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Actions */}
-                <div className="flex border-t">
-                  <button onClick={() => onAddEx(t)} className="flex-1 py-3 text-indigo-600 hover:bg-indigo-50 font-medium flex items-center justify-center gap-2">
-                    <Plus className="w-4 h-4" /> Dodaj ćwiczenie
-                  </button>
-                  <button onClick={() => onEdit(t)} className="flex-1 py-3 text-gray-600 hover:bg-gray-50 font-medium flex items-center justify-center gap-2 border-l">
-                    <Edit2 className="w-4 h-4" /> Edytuj
-                  </button>
-                  <button onClick={() => onDelete(key, t.id)} className="flex-1 py-3 text-red-600 hover:bg-red-50 font-medium flex items-center justify-center gap-2 border-l">
-                    <Trash2 className="w-4 h-4" /> Usuń
-                  </button>
+                <div className="flex border-t text-sm">
+                  <button onClick={() => onAddEx(t)} className="flex-1 py-2.5 text-indigo-600 hover:bg-indigo-50 font-medium flex items-center justify-center gap-1"><Plus className="w-4 h-4" />Dodaj</button>
+                  <button onClick={() => onEdit(t)} className="flex-1 py-2.5 text-gray-600 hover:bg-gray-50 font-medium flex items-center justify-center gap-1 border-l"><Edit2 className="w-4 h-4" />Edytuj</button>
+                  <button onClick={() => onDelete(key, t.id)} className="flex-1 py-2.5 text-red-600 hover:bg-red-50 font-medium flex items-center justify-center gap-1 border-l"><Trash2 className="w-4 h-4" />Usuń</button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <Dumbbell className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg font-medium">Brak treningów</p>
-            <p className="text-gray-400 mb-4">Dodaj swój pierwszy trening tego dnia</p>
-            <button 
-              onClick={() => onAdd(date)}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium inline-flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" /> Dodaj trening
+            <Dumbbell className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500 font-medium">Brak treningów</p>
+            <button onClick={() => onAdd(date)} className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2">
+              <Plus className="w-4 h-4" />Dodaj trening
             </button>
           </div>
         )}
@@ -469,8 +356,8 @@ function ExForm({ ex, onChange, onRemove, idx }) {
   );
 }
 
-// ============ MOBILE VIEW ============
-function Mobile({ data, sel, setSel, ws, onDayClick }) {
+// ============ MOBILE WEEK VIEW ============
+function MobileWeek({ data, sel, setSel, ws, onDayClick }) {
   const today = dk(new Date()), selKey = dk(sel);
   const week = Array.from({ length: 7 }, (_, i) => { const d = new Date(ws); d.setDate(d.getDate() + i); return d; });
   const trainings = data[selKey] || [];
@@ -492,10 +379,7 @@ function Mobile({ data, sel, setSel, ws, onDayClick }) {
         </div>
       </div>
       
-      <div 
-        className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between cursor-pointer hover:bg-gray-100"
-        onClick={() => onDayClick(sel)}
-      >
+      <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between cursor-pointer hover:bg-gray-100" onClick={() => onDayClick(sel)}>
         <div>
           <p className="font-semibold">{sel.toLocaleDateString('pl', { weekday: 'long' })}</p>
           <p className="text-sm text-gray-500">{sel.getDate()} {MONTHS[sel.getMonth()]}</p>
@@ -507,21 +391,13 @@ function Mobile({ data, sel, setSel, ws, onDayClick }) {
         {trainings.length > 0 ? (
           <div className="space-y-2">
             {trainings.map(t => (
-              <div 
-                key={t.id}
-                onClick={() => onDayClick(sel)}
-                className="bg-white rounded-lg border p-3 cursor-pointer hover:shadow-md transition-shadow"
-              >
+              <div key={t.id} onClick={() => onDayClick(sel)} className="bg-white rounded-lg border p-3 cursor-pointer hover:shadow-md">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-indigo-600">{t.startTime}</span>
-                  <div className="flex gap-1">
-                    {[...new Set(t.exercises.map(e => e.cat))].map(c => (
-                      <span key={c}>{CATS[c]?.icon}</span>
-                    ))}
-                  </div>
+                  <div className="flex gap-1">{[...new Set(t.exercises.map(e => e.cat))].map(c => <span key={c}>{CATS[c]?.icon}</span>)}</div>
                 </div>
                 {t.note && <p className="text-sm text-gray-500 mb-2">{t.note}</p>}
-                <p className="text-xs text-gray-400">{t.exercises.length} ćwiczeń • Kliknij aby zobaczyć szczegóły</p>
+                <p className="text-xs text-gray-400">{t.exercises.length} ćwiczeń</p>
               </div>
             ))}
           </div>
@@ -529,9 +405,48 @@ function Mobile({ data, sel, setSel, ws, onDayClick }) {
           <div className="text-center py-10 text-gray-400">
             <Dumbbell className="w-10 h-10 mx-auto mb-2 opacity-30" />
             <p className="text-sm">Brak treningów</p>
-            <p className="text-xs">Kliknij datę aby dodać</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ============ MOBILE MONTH VIEW ============
+function MobileMonth({ data, date, sel, setSel, onDayClick }) {
+  const today = dk(new Date()), selKey = dk(sel);
+  const days = getMonth(date.getFullYear(), date.getMonth());
+
+  return (
+    <div className="flex flex-col h-full p-2">
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'].map(d => (
+          <div key={d} className="text-center py-1 text-xs font-medium text-gray-500">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1 flex-1">
+        {days.map(({ d, cur }, i) => {
+          const k = dk(d), t = data[k] || [], isT = k === today, isS = k === selKey;
+          return (
+            <div
+              key={i}
+              onClick={() => { setSel(d); if (t.length > 0) onDayClick(d); }}
+              className={`rounded-lg flex flex-col items-center justify-center p-1 cursor-pointer
+                ${isT ? 'bg-indigo-100 border-2 border-indigo-500' : isS ? 'bg-indigo-50 border border-indigo-300' : 'bg-white border border-gray-200'}
+                ${!cur ? 'opacity-40' : ''}`}
+            >
+              <span className={`text-sm font-semibold ${isT ? 'text-indigo-600' : ''}`}>{d.getDate()}</span>
+              {t.length > 0 && (
+                <div className="flex gap-0.5 mt-0.5">
+                  {[...new Set(t.flatMap(tr => tr.exercises.map(e => e.cat)))].slice(0, 3).map(c => (
+                    <span key={c} className="text-xs">{CATS[c]?.icon}</span>
+                  ))}
+                </div>
+              )}
+              {t.length > 0 && <span className="text-xs text-indigo-600 font-medium">{t.length}</span>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -578,7 +493,6 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
                       </div>
                     </div>
                   ))}
-                  {t.length > (isW ? 10 : 2) && <p className="text-xs text-gray-400 text-center">+{t.length - (isW ? 10 : 2)}</p>}
                 </div>
               </div>
             );
@@ -588,22 +502,15 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
       
       {isW && (
         <div className="w-80 border-l bg-gray-50 p-4 overflow-y-auto flex-shrink-0">
-          <div 
-            className="mb-4 cursor-pointer hover:bg-white p-3 -m-3 rounded-lg transition-colors"
-            onClick={() => onDayClick(sel)}
-          >
+          <div className="mb-4 cursor-pointer hover:bg-white p-3 -m-3 rounded-lg" onClick={() => onDayClick(sel)}>
             <p className="font-bold text-lg">{sel.toLocaleDateString('pl', { weekday: 'long' })}</p>
             <p className="text-gray-500">{sel.getDate()} {MONTHS[sel.getMonth()]}</p>
-            <p className="text-sm text-indigo-600 mt-1">Kliknij aby zobaczyć szczegóły →</p>
+            <p className="text-sm text-indigo-600 mt-1">Kliknij po szczegóły →</p>
           </div>
           
           <div className="space-y-2">
             {(data[selKey] || []).map(t => (
-              <div 
-                key={t.id}
-                onClick={() => onDayClick(sel)}
-                className="bg-white rounded-lg border p-3 cursor-pointer hover:shadow"
-              >
+              <div key={t.id} onClick={() => onDayClick(sel)} className="bg-white rounded-lg border p-3 cursor-pointer hover:shadow">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-indigo-600">{t.startTime}</span>
                   <span className="flex">{[...new Set(t.exercises.map(e => e.cat))].map(c => <span key={c}>{CATS[c]?.icon}</span>)}</span>
@@ -611,12 +518,7 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
                 <p className="text-xs text-gray-500">{t.exercises.length} ćwiczeń</p>
               </div>
             ))}
-            {!data[selKey]?.length && (
-              <div className="text-center py-8 text-gray-400">
-                <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p>Brak treningów</p>
-              </div>
-            )}
+            {!data[selKey]?.length && <div className="text-center py-8 text-gray-400"><Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" /><p>Brak treningów</p></div>}
           </div>
         </div>
       )}
@@ -627,7 +529,7 @@ function Desktop({ data, date, mode, sel, setSel, onDayClick }) {
 // ============ MAIN TRACKER ============
 function Tracker() {
   const { user, logout } = useAuth();
-  const [screen, setScreen] = useState('calendar'); // calendar, day, stats
+  const [screen, setScreen] = useState('calendar');
   const [date, setDate] = useState(new Date());
   const [sel, setSel] = useState(new Date());
   const [mode, setMode] = useState('week');
@@ -648,11 +550,12 @@ function Tracker() {
   const [ws, setWs] = useState(getWs(new Date()));
 
   const nav = dir => { 
-    if (mobile) { 
-      const w = new Date(ws); 
-      w.setDate(w.getDate() + dir * 7); 
-      setWs(w); 
-      setSel(w); 
+    if (mobile) {
+      if (mode === 'week') {
+        const w = new Date(ws); w.setDate(w.getDate() + dir * 7); setWs(w); setSel(w);
+      } else {
+        const d = new Date(date); d.setMonth(d.getMonth() + dir); setDate(d);
+      }
     } else { 
       const d = new Date(date); 
       mode === 'week' ? d.setDate(d.getDate() + dir * 7) : d.setMonth(d.getMonth() + dir); 
@@ -678,37 +581,24 @@ function Tracker() {
   const delT = (key, id) => { const newData = { ...data, [key]: data[key].filter(t => t.id !== id) }; setData(newData); save(newData); };
 
   const title = mobile 
-    ? `${MONTHS_SHORT[ws.getMonth()]} ${ws.getFullYear()}` 
+    ? `${MONTHS[date.getMonth()]} ${date.getFullYear()}` 
     : mode === 'week' 
       ? `${getWeek(date)[0].getDate()}-${getWeek(date)[6].getDate()} ${MONTHS_SHORT[getWeek(date)[0].getMonth()]} ${getWeek(date)[0].getFullYear()}` 
       : `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 
   // Stats screen
-  if (screen === 'stats') {
-    return <StatsScreen data={data} onBack={() => setScreen('calendar')} />;
-  }
+  if (screen === 'stats') return <StatsScreen data={data} onBack={() => setScreen('calendar')} />;
 
   // Day view screen
   if (screen === 'day') {
     return (
       <>
-        <DayView 
-          data={data} 
-          date={sel} 
-          onBack={() => setScreen('calendar')} 
-          onEdit={openEdit}
-          onDelete={delT}
-          onAdd={openAdd}
-          onAddEx={openAddEx}
-        />
+        <DayView data={data} date={sel} onBack={() => setScreen('calendar')} onEdit={openEdit} onDelete={delT} onAdd={openAdd} onAddEx={openAddEx} />
         {modal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
               <div className="p-3 border-b flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold">{editing ? 'Edytuj' : 'Nowy trening'}</h3>
-                  <p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
-                </div>
+                <div><h3 className="font-bold">{editing ? 'Edytuj' : 'Nowy trening'}</h3><p className="text-sm text-gray-500">{sel?.toLocaleDateString('pl', { weekday: 'short', day: 'numeric', month: 'short' })}</p></div>
                 <button onClick={() => setModal(false)}><X className="w-5 h-5" /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-3">
@@ -718,17 +608,11 @@ function Tracker() {
                 </div>
                 <div><label className="text-xs font-medium text-gray-600">Notatka</label><input type="text" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} placeholder="Push day..." className="w-full border rounded px-2 py-1.5 mt-1" /></div>
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Ćwiczenia</label>
-                    <button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4" />Dodaj</button>
-                  </div>
+                  <div className="flex items-center justify-between mb-2"><label className="text-sm font-medium">Ćwiczenia</label><button onClick={() => setForm({ ...form, exercises: [...form.exercises, { ...emptyEx }] })} className="text-sm text-indigo-600 font-medium flex items-center gap-1"><Plus className="w-4 h-4" />Dodaj</button></div>
                   <div className="space-y-2">{form.exercises.map((ex, i) => <ExForm key={i} ex={ex} idx={i} onChange={e => setForm({ ...form, exercises: form.exercises.map((x, j) => j === i ? e : x) })} onRemove={() => setForm({ ...form, exercises: form.exercises.filter((_, j) => j !== i) })} />)}</div>
                 </div>
               </div>
-              <div className="p-3 border-t flex gap-2">
-                <button onClick={() => setModal(false)} className="flex-1 py-2 border rounded font-medium">Anuluj</button>
-                <button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2 bg-indigo-600 text-white rounded font-medium disabled:opacity-50">Zapisz</button>
-              </div>
+              <div className="p-3 border-t flex gap-2"><button onClick={() => setModal(false)} className="flex-1 py-2 border rounded font-medium">Anuluj</button><button onClick={saveT} disabled={!form.exercises.some(e => e.ex)} className="flex-1 py-2 bg-indigo-600 text-white rounded font-medium disabled:opacity-50">Zapisz</button></div>
             </div>
           </div>
         )}
@@ -736,7 +620,7 @@ function Tracker() {
     );
   }
 
-  // Calendar view (default)
+  // Calendar view
   return (
     <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
       <header className="bg-white border-b flex-shrink-0">
@@ -747,9 +631,7 @@ function Tracker() {
             {saving && <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />}
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => setScreen('stats')} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg">
-              <BarChart3 className="w-5 h-5" />
-            </button>
+            <button onClick={() => setScreen('stats')} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg"><BarChart3 className="w-5 h-5" /></button>
             <div className="relative">
               <button onClick={() => setMenu(!menu)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><Menu className="w-5 h-5" /></button>
               {menu && <>
@@ -769,32 +651,29 @@ function Tracker() {
             <button onClick={goToday} className="px-2 py-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded">Dziś</button>
           </div>
           <span className="font-semibold text-sm">{title}</span>
-          {!mobile && (
-            <div className="flex bg-white border rounded p-0.5">
-              {['week', 'month'].map(m => (
-                <button key={m} onClick={() => { setMode(m); save(data, m); }} className={`px-3 py-1.5 rounded text-sm font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}>
-                  {m === 'week' ? 'Tydzień' : 'Miesiąc'}
-                </button>
-              ))}
-            </div>
-          )}
-          {mobile && <div className="w-14" />}
+          {/* Przełącznik widoków - działa na mobile i desktop */}
+          <div className="flex bg-white border rounded p-0.5">
+            {['week', 'month'].map(m => (
+              <button key={m} onClick={() => { setMode(m); save(data, m); }} className={`px-2 py-1 rounded text-xs font-medium ${mode === m ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}>
+                {m === 'week' ? 'Tydz' : 'Mies'}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
       
       <main className="flex-1 overflow-hidden">
-        {mobile 
-          ? <Mobile data={data} sel={sel} setSel={setSel} ws={ws} onDayClick={openDayView} />
-          : <Desktop data={data} date={date} mode={mode} sel={sel} setSel={setSel} onDayClick={openDayView} />
-        }
+        {mobile ? (
+          mode === 'week' 
+            ? <MobileWeek data={data} sel={sel} setSel={setSel} ws={ws} onDayClick={openDayView} />
+            : <MobileMonth data={data} date={date} sel={sel} setSel={setSel} onDayClick={openDayView} />
+        ) : (
+          <Desktop data={data} date={date} mode={mode} sel={sel} setSel={setSel} onDayClick={openDayView} />
+        )}
       </main>
       
-      {/* FAB on mobile */}
       {mobile && (
-        <button 
-          onClick={() => openAdd(sel)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700"
-        >
+        <button onClick={() => openAdd(sel)} className="fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center">
           <Plus className="w-6 h-6" />
         </button>
       )}
